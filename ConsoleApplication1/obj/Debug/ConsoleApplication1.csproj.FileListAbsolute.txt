@@ -1,0 +1,11 @@
+c:\users\t_elane\documents\visual studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+c:\users\t_elane\documents\visual studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
+c:\users\t_elane\documents\visual studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
+c:\users\t_elane\documents\visual studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+c:\users\t_elane\documents\visual studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\ClassLibrary1.dll
+C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\ClassLibrary1.pdb
+C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
