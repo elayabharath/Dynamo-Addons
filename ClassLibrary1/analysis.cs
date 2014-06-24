@@ -13,6 +13,8 @@ public static class analysis
      * -------------------------------------------------------------------------*/
     public static double findMean(List<double> numList)
     {
+
+        
         int count = 0;
         double mean = 0;
 
