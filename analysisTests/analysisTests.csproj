@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary1\analysisMain.csproj">
+    <ProjectReference Include="..\ClassLibrary1\dataAnalysis.csproj">
       <Project>{87b66f77-2b1c-4077-a3c1-0fd1dc6ddad0}</Project>
-      <Name>analysisMain</Name>
+      <Name>dataAnalysis</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

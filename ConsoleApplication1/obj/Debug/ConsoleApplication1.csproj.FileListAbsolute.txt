@@ -9,3 +9,4 @@ C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\Conso
 C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
 C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
 C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\ConsoleApplication1\bin\Debug\DynamoLibraryAddonConsole.exe.config

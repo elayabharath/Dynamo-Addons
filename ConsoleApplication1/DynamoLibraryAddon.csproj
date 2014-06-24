@@ -7,8 +7,8 @@
     <ProjectGuid>{79C21615-0C7B-4B8F-89D3-6E5B6C2EB9FD}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>ConsoleApplication1</AssemblyName>
+    <RootNamespace>DynLibAddon</RootNamespace>
+    <AssemblyName>DynamoLibraryAddonConsole</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -48,9 +48,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary1\analysisMain.csproj">
+    <ProjectReference Include="..\ClassLibrary1\dataAnalysis.csproj">
       <Project>{87b66f77-2b1c-4077-a3c1-0fd1dc6ddad0}</Project>
-      <Name>analysisMain</Name>
+      <Name>dataAnalysis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
