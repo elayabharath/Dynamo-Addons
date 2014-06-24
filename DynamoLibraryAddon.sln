@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoLibraryAddon", "ConsoleApplication1\DynamoLibraryAddon.csproj", "{79C21615-0C7B-4B8F-89D3-6E5B6C2EB9FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoLibraryAddon", "ConsoleApplication\DynamoLibraryAddon.csproj", "{79C21615-0C7B-4B8F-89D3-6E5B6C2EB9FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "ClassLibrary1\dataAnalysis.csproj", "{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "ClassLibrary\dataAnalysis.csproj", "{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "analysisTests", "analysisTests\analysisTests.csproj", "{3A492A37-FC07-460B-BA19-62F0CFB1711C}"
 EndProject
