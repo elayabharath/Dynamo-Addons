@@ -1,7 +1,0 @@
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\bin\Debug\analysisTests.dll
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\bin\Debug\analysisTests.pdb
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\bin\Debug\ClassLibrary1.dll
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\bin\Debug\ClassLibrary1.pdb
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\obj\Debug\analysisTests.csprojResolveAssemblyReference.cache
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\obj\Debug\analysisTests.dll
-C:\Users\t_elane\Documents\Visual Studio 2012\Projects\ConsoleApplication1\analysisTests\obj\Debug\analysisTests.pdb
