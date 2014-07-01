@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoLibraryAddon", "ConsoleApplication\DynamoLibraryAddon.csproj", "{79C21615-0C7B-4B8F-89D3-6E5B6C2EB9FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "ClassLibrary\dataAnalysis.csproj", "{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "DataAnalysis\dataAnalysis.csproj", "{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySpirals", "GeometrySpirals\GeometrySpirals.csproj", "{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +21,10 @@ Global
 		{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

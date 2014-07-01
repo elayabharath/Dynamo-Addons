@@ -1,0 +1,7 @@
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\bin\Debug\GeometrySpirals.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\bin\Debug\GeometrySpirals.pdb
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\bin\Debug\ProtoGeometry.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\bin\Debug\ProtoInterface.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\bin\Debug\ProtoGeometry.xml
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\obj\Debug\GeometrySpirals.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\GeometrySpirals\obj\Debug\GeometrySpirals.pdb
