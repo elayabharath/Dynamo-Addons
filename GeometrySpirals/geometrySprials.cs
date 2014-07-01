@@ -175,7 +175,7 @@ public class spirals
 
         return NurbsCurve.ByPoints(pts);
     }
-    public static List<Point> lituusSpiral(double angle)
+    public static NurbsCurve lituusSpiral(double angle)
     {
         
         if (angle == 0.0)
@@ -191,7 +191,7 @@ public class spirals
 
         var pts = new List<Point>();
 
-        for (int i = 0; i < numPts; ++i)
+        for (int i = 1; i <= numPts; ++i)
         {
             double currAngle = (double)i / 1000.0 * angle;
             double radius = Math.Sqrt(1/currAngle);
@@ -202,7 +202,7 @@ public class spirals
             pts.Add(Point.ByCoordinates(xVal, yVal, 0));
         }
 
-        return pts; //.ByPoints(pts);
+        return NurbsCurve.ByPoints(pts);
     }
     public static NurbsCurve theodorusSpiral(int n)
     {

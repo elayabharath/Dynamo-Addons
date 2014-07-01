@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "DataAnalysi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySpirals", "GeometrySpirals\GeometrySpirals.csproj", "{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svgPort", "svgPort\svgPort.csproj", "{875612B7-864D-4664-BE59-BCB2A63DBA8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

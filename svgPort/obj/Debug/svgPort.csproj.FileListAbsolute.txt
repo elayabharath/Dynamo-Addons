@@ -1,0 +1,4 @@
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\svgPort\bin\Debug\svgPort.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\svgPort\bin\Debug\svgPort.pdb
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\svgPort\obj\Debug\svgPort.dll
+C:\Users\t_elane\Documents\GitHub\DynamoLibraryAddon\svgPort\obj\Debug\svgPort.pdb
