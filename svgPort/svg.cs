@@ -34,7 +34,11 @@ namespace svgPort
         
         public static void exportPathsAsSVG(List<Geometry> geometry, String exportLocation, string fileName )
         {
-            
+
+            var boundingBox = BoundingBox.ByGeometry(geometry);
+            var maxPt = boundingBox.MaxPoint;
+            var minPt = boundingBox.MinPoint;
+
             //TODO: Handle replication for geometry
 
             var file = CreateNewSVGFile(exportLocation, fileName);
@@ -43,7 +47,7 @@ namespace svgPort
             preSVGBody(file);
             
             //start the svg tag
-            file.WriteLine(@"<svg version=""1.1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" x=""0px"" y=""0px"" width=""1000px"" height=""1000px"" viewBox=""0 0 1000 1000"" xml:space=""preserve""> ");
+            file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+maxPt.X+"px' height='"+maxPt.Y+"px' viewBox='0 0 "+maxPt.X+" "+maxPt.Y+"' xml:space='preserve'> ");
             
 
             //segregate all points
@@ -58,6 +62,8 @@ namespace svgPort
 
             for (int i = 0; i < geometry.Count; ++i)
             {
+                geometry[i] = geometry[i].Translate(0 - minPt.X, 0 - minPt.Y, 0);
+
                 if (geometry[i].GetType() == typeof(Point))
                     pts.Add((Point)geometry[i]);
 
