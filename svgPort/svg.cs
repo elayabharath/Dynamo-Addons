@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
+using System.Collections;
 
 namespace svgPort
 {
@@ -47,7 +48,7 @@ namespace svgPort
             preSVGBody(file);
             
             //start the svg tag
-            file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+maxPt.X+"px' height='"+maxPt.Y+"px' viewBox='0 0 "+maxPt.X+" "+maxPt.Y+"' xml:space='preserve'> ");
+            file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+(maxPt.X-minPt.X)+"px' height='"+(maxPt.Y-minPt.Y)+"px' viewBox='0 0 "+(maxPt.X-minPt.X)+" "+(maxPt.Y-minPt.Y)+"' xml:space='preserve'> ");
             
 
             //segregate all points
@@ -118,9 +119,48 @@ namespace svgPort
                 double x2 = endPt.X;
                 double y2 = endPt.Y;
 
-                file.WriteLine("<line x1='" + x1.ToString() + "' y1='" + y1.ToString() + "' x2='"+ x2.ToString() +"' y2='"+y2.ToString()+"' style='stroke:black; stroke-width: 1'/>");
+                file.WriteLine("<line x1='" + x1.ToString() + "' y1='" + y1.ToString() + "' x2='"+ x2.ToString() +"' y2='"+y2.ToString()+"' style='stroke:black; stroke-width: 1;'/>");
 
-                if (i == pts.Count - 1)
+                if (i == lines.Count - 1)
+                    file.WriteLine("</g>");
+            }
+
+
+            //write all ellipses into the file
+            for (int i = 0; i < ellipses.Count; ++i)
+            {
+                if (i == 0)
+                    file.WriteLine("<g>");
+
+                Point centerPt = ellipses[i].CenterPoint;
+                var majorAxis = ellipses[i].MajorAxis;
+                var minorAxis = ellipses[i].MinorAxis;
+
+                file.WriteLine("<ellipse cx='" + centerPt.X + "' cy='" + centerPt.Y + "' rx='" + majorAxis.Length + "' ry='" + minorAxis.Length + "' transform='rotate("+Math.Atan(majorAxis.Y/majorAxis.X)*180/Math.PI+", "+centerPt.X+", "+centerPt.Y+")' style='stroke:black; stroke-width: 1;'/>");
+
+                if (i == ellipses.Count - 1)
+                    file.WriteLine("</g>");
+            }
+
+
+            //write all polygons into the file
+            for (int i = 0; i < polygons.Count; ++i)
+            {
+                if (i == 0)
+                    file.WriteLine("<g>");
+
+                var vertices = new List<Point>();
+                vertices.AddRange(polygons[i].Points);
+
+                String collectedString = "";
+                foreach(var vertex in vertices)
+                {
+                    collectedString = collectedString + vertex.X + ", " + vertex.Y + " ";
+                }
+
+                file.WriteLine("<polygon points='"+collectedString+"' style='fill: none; stroke-width: 1; stroke: #000000;'/>");
+
+                if (i == polygons.Count - 1)
                     file.WriteLine("</g>");
             }
 
