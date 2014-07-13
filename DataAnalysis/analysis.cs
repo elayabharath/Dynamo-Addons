@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Autodesk.DesignScript.Geometry;
 
 
 public static class analysis
@@ -14,7 +16,7 @@ public static class analysis
     public static double findMean(List<double> numList)
     {
 
-        
+
         int count = 0;
         double mean = 0;
 
@@ -118,16 +120,16 @@ public static class analysis
     {
         // sort the number list in ascending order
         numList = SortAscending(numList);
-        
+
         // for even number of dataset, the mean of middle 2 numbers is the median
         if (numList.Count % 2 == 1)
         {
-            return numList[numList.Count/2];
+            return numList[numList.Count / 2];
         }
 
         // for odd number of dataset, middle element is the median
         else
-            return (numList[numList.Count/2] + numList[numList.Count/2 - 1])/2;
+            return (numList[numList.Count / 2] + numList[numList.Count / 2 - 1]) / 2;
     }
 
 
@@ -144,7 +146,7 @@ public static class analysis
         // find the median of each array
         List<double> median = new List<double> { };
         int count = 0;
-        for(int i=0; i<numList.Count; i=i+5)
+        for (int i = 0; i < numList.Count; i = i + 5)
         {
             double[] groupOfFive;
             if (i + 4 < numList.Count)
@@ -161,7 +163,7 @@ public static class analysis
             List<double> groupOfFiveSorted = SortAscending(groupOfFive.ToList());
             double medianTemp = groupOfFiveSorted[groupOfFiveSorted.Count / 2];
 
-            median.Insert(count++, medianTemp); 
+            median.Insert(count++, medianTemp);
         }
 
         // select the pivot
@@ -178,7 +180,7 @@ public static class analysis
                 smallList.Add(numList[i]);
             else if (numList[i].CompareTo(pivot) > 0)
                 bigList.Add(numList[i]);
-            else 
+            else
                 ++pivotCount;
         }
 
@@ -188,7 +190,7 @@ public static class analysis
 
         // find K
         int k = smallList.Count + 1;
-        
+
         // apply conditions for K
         if (k == nth)
             return pivot;
@@ -210,7 +212,7 @@ public static class analysis
         double M2 = 0;
         double delta = 0;
 
-        foreach(double x in numList)
+        foreach (double x in numList)
         {
             n = n + 1;
             delta = x - mean;
@@ -218,7 +220,7 @@ public static class analysis
             M2 = M2 + delta * (x - mean);
         }
 
-        return M2/(n-1);
+        return M2 / (n - 1);
     }
 
     /* -------------------------------------------------------------------------
@@ -254,16 +256,16 @@ public static class analysis
         }
 
         // find sX and sY
-        double summation=0;
+        double summation = 0;
         double sX = Math.Sqrt(sX2);
         double sY = Math.Sqrt(sY2);
-        
+
         // this form is used so that the resulting values are always numerically stable
         for (int i = 0; i < n; ++i)
         {
-            summation = summation + ((numListX[i] - xMean) / sX * (numListY[i] - yMean) / sY)/(n-1);
+            summation = summation + ((numListX[i] - xMean) / sX * (numListY[i] - yMean) / sY) / (n - 1);
         }
-        
+
         return summation;
     }
 
@@ -272,7 +274,7 @@ public static class analysis
     {
         double xBar = 0;
         double yBar = 0;
-        int n=x.Count;
+        int n = x.Count;
 
         for (int i = 0; i < n; ++i)
         {
@@ -285,12 +287,12 @@ public static class analysis
 
         double sX2 = 0;
         double sY2 = 0;
-        
+
 
         for (int i = 0; i < n; ++i)
         {
-            sX2 = sX2 + (x[i] - xBar)*(x[i] - xBar);
-            sY2 = sY2 + (y[i] - yBar)*(y[i] - yBar);
+            sX2 = sX2 + (x[i] - xBar) * (x[i] - xBar);
+            sY2 = sY2 + (y[i] - yBar) * (y[i] - yBar);
         }
 
         sX2 = sX2 / (n - 1);
@@ -316,7 +318,7 @@ public static class analysis
         int n = numListX.Count;
 
         double sumX = 0, sumY = 0, sumXX = 0, sumXY = 0, sumYY = 0;
-        
+
         List<double> XY = new List<double> { };
         List<double> XX = new List<double> { };
         List<double> YY = new List<double> { };
@@ -336,17 +338,17 @@ public static class analysis
         }
 
         return (n * sumXY - sumX * sumY) / Math.Sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
-       
+
     }
 
 
     /* -------------------------------------------------------------------------
     * find histogram frequency table for a given dataset
     * -------------------------------------------------------------------------*/
-    public static List<int> findHistogram (List<double> numList, int numIntervals, double min, double max)
+    public static List<int> findHistogram(List<double> numList, int numIntervals, double min, double max)
     {
         // calculate the interval
-        double interval = (max - min)/numIntervals;
+        double interval = (max - min) / numIntervals;
 
         // create a list of of histogram based on the number of intervals
         List<int> histogram = new List<int>(new int[numIntervals]);
@@ -363,6 +365,105 @@ public static class analysis
 
         return histogram;
     }
+
+    /* ------------
+     * K-Means clustering
+     * ------------ */
+    public static List<List<Point>> kMeansClusteringWithK(List<Point> points, int k)
+    {
+        List<List<Point>> clusters = new List<List<Point>>();
+        List<Point> centroids = new List<Point>();
+
+        for (int i = 0; i < k; ++i)
+        {
+            clusters.Add(new List<Point>());
+        }
+
+        //finding max and min X, Y, Z
+
+        var box = BoundingBox.ByGeometry(points);
+        Point minPt = box.MinPoint;
+        Point maxPt = box.MaxPoint;
+
+        //intitialize random centers for a given k
+        for (int i = 0; i < k; ++i)
+        {
+            Random r = new Random();
+
+            Thread.Sleep(r.Next(0, 10));
+            double xVal = r.NextDouble() * (maxPt.X - minPt.X) + minPt.X;
+            Thread.Sleep(r.Next(0, 10));
+            double yVal = r.NextDouble() * (maxPt.Y - minPt.Y) + minPt.Y;
+            Thread.Sleep(r.Next(0, 10));
+            double zVal = r.NextDouble() * (maxPt.Z - minPt.Z) + minPt.Z;
+
+            Point tempPt = Point.ByCoordinates(xVal, yVal, zVal);
+            
+            centroids.Add(Point.ByCoordinates(xVal, yVal, zVal));
+        }
+
+        
+
+        double prevDistance = 0;
+
+        //assign points to the initial centroid 
+        for (int i = 0; i < points.Count; ++i)
+        {
+            int clusterToAdd = 0;
+            Point pointInConsideration = points[i];
+            prevDistance = pointInConsideration.DistanceTo(centroids[0]);
+
+            for (int j = 1; j < k; ++j)
+            {
+                double distance = pointInConsideration.DistanceTo(centroids[j]);
+
+                if (distance < prevDistance)
+                {
+                    clusterToAdd = j;
+                    prevDistance = distance;
+                }
+            }
+
+            clusters[clusterToAdd].Add(pointInConsideration);
+        }
+
+        var oldCentroids = new List<Point>();
+
+        loop:
+        oldCentroids = centroids;
+        //compute new centroids for given clusters. If the clusters are empty, go back to old centroid
+        for (int i = 0; i < clusters.Count; ++i)
+        {
+            if (clusters[i].Count == 0)
+                centroids[i] = centroids[i];
+            else
+            {
+                double xSum = 0, ySum = 0, zSum = 0;
+
+                for(int j=0; j<clusters[i].Count; ++j)
+                {
+                    xSum = xSum + clusters[i][j].X;
+                    ySum = ySum + clusters[i][j].Y;
+                    zSum = zSum + clusters[i][j].Z;
+                }
+
+                centroids[i] = Point.ByCoordinates(xSum / clusters[i].Count, ySum / clusters[i].Count, zSum / clusters[i].Count);
+            }
+
+        }
+
+        for (int i = 0; i < centroids.Count; ++i )
+        {
+            if((oldCentroids[i].X != centroids[i].X)||(oldCentroids[i].Y != centroids[i].Y)||(oldCentroids[i].Z != centroids[i].Z))
+            {
+                oldCentroids = centroids;
+                goto loop;
+            }
+        }
+           
+        return clusters;
+    }
+
 }
 
 

@@ -4,7 +4,6 @@ TestResults/
 ###################
 *.com
 *.class
-*.dll
 *.exe
 *.msi
 *.o
