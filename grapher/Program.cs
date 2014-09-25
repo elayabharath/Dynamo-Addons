@@ -3,20 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
-using System.Collections;
-using Autodesk.DesignScript.Geometry;
-
-namespace Application
+namespace grapher
 {
     class Program
     {
         static void Main(string[] args)
         {
-
-
-            System.Console.ReadKey();
         }
     }
 }

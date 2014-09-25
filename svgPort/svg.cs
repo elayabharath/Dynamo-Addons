@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
 using System.Collections;
+using Autodesk.DesignScript.Runtime;
 
 namespace svgPort
 {
@@ -32,9 +33,22 @@ namespace svgPort
             file.WriteLine(line3);
         }
 
-        
-        public static void exportPathsAsSVG(List<Geometry> geometry, String exportLocation, string fileName )
+        public static void exportPathsAsSVG([ArbitraryDimensionArrayImport] IList geometryList, String exportLocation, string fileName)
         {
+            //IList<Geometry> geometry = geometryList as IList<Geometry>;
+
+            var type = geometryList.GetType();
+            
+            Geometry[] geometry;
+
+            try
+            {
+                geometry = geometryList.Cast<List<Geometry>>().SelectMany(i => i).ToArray();
+            }
+            catch
+            {
+                geometry = geometryList.Cast<Geometry>().ToArray();
+            }
 
             var boundingBox = BoundingBox.ByGeometry(geometry);
             var maxPt = boundingBox.MaxPoint;
@@ -61,7 +75,7 @@ namespace svgPort
             //TODO: Need to support paths
 
 
-            for (int i = 0; i < geometry.Count; ++i)
+            for (int i = 0; i < geometry.Count(); ++i)
             {
                 geometry[i] = geometry[i].Translate(0 - minPt.X, 0 - minPt.Y, 0);
 

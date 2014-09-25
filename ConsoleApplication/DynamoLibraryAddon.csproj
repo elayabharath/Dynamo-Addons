@@ -33,10 +33,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ProtoGeometry">
-      <HintPath>..\GeometrySpirals\bin\Debug\ProtoGeometry.dll</HintPath>
+      <HintPath>..\..\Dynamo\extern\ProtoGeometry\ProtoGeometry.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ProtoInterface">
-      <HintPath>..\GeometrySpirals\bin\Debug\ProtoInterface.dll</HintPath>
+      <HintPath>..\..\Dynamo\extern\ProtoGeometry\ProtoInterface.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,10 +59,6 @@
     <ProjectReference Include="..\DataAnalysis\dataAnalysis.csproj">
       <Project>{87b66f77-2b1c-4077-a3c1-0fd1dc6ddad0}</Project>
       <Name>dataAnalysis</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\svgPort\svgPort.csproj">
-      <Project>{875612b7-864d-4664-be59-bcb2a63dba8a}</Project>
-      <Name>svgPort</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
