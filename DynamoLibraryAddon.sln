@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySpirals", "Geometry
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svgPort", "svgPort\svgPort.csproj", "{875612B7-864D-4664-BE59-BCB2A63DBA8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grapher", "grapher\grapher.csproj", "{9EAEC452-7F91-470E-8957-BC10EEA18C97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{875612B7-864D-4664-BE59-BCB2A63DBA8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
