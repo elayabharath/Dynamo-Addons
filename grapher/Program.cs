@@ -36,6 +36,24 @@ namespace grapher
         */
         public static void scatterPlot(IList<double> XValues, IList<double> YValues)
         {
+
+            //sanitize the incoming data
+            if (XValues.Count() <= 0 || YValues.Count() <= 0)
+            {
+                throw new ArgumentException("The inputs need to be at least 1 item.");
+            }
+
+            if( XValues.GetType() != typeof(double[])  || YValues.GetType() != typeof(double[]))
+            {
+                throw new ArgumentException("Currently only numbers are supported on X and Y values, sorry!");
+            }
+
+            if(XValues.Count()!= YValues.Count())
+            {
+                throw new ArgumentException("The values of X and Y are not of same count. Not currently supported, sorry!");
+            }
+
+
             double maxX = XValues.Max();
             double minX = XValues.Min();
             double diffX = (maxX - minX) / 5;
@@ -104,7 +122,7 @@ namespace grapher
             if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
                 throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
 
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + fileName + ".svg");
+            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
             return file;
         }
     }
