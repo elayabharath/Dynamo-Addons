@@ -6,6 +6,7 @@ Project to add useful add-ons that will stretch the capabilities of Dynamo libra
 Grapher update
 - Ability to create scatter plot added
 - Single series plot only supported
+
 ![alt tag](/Resources/scatterPlot.png)
 
 SVGPort update
