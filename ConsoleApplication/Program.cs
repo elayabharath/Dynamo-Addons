@@ -15,7 +15,11 @@ namespace Application
         static void Main(string[] args)
         {
 
-           
+            var exportLoc = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            Console.WriteLine(exportLoc);
+
+            Console.ReadKey();
         }
 
 

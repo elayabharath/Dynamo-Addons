@@ -24,11 +24,13 @@ using Dynamo.Nodes;
 
 namespace grapher
 {
-    public class Program
+    public class scatterPlot
     {
-        
-        public static void scatterPlot(IList<double> XValues, IList<double> YValues, String filePath)
+
+        public static void create(IList<double> XValues, IList<double> YValues, String exportLocation = "Desktop", String chartTitle = "Chart title", string XLabel = "X Values", string YLabel = "Y Values", int width = 500, int height = 500)
         {
+            if (exportLocation == "" || string.Compare(exportLocation, "Desktop")==0 || exportLocation == null)
+                exportLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
             //sanitize the incoming data
             if (XValues.Count() <= 0 || YValues.Count() <= 0)
@@ -36,12 +38,12 @@ namespace grapher
                 throw new ArgumentException("The inputs need to be at least 1 item.");
             }
 
-            if( XValues.GetType() != typeof(double[])  || YValues.GetType() != typeof(double[]))
+            if (XValues.GetType() != typeof(double[]) || YValues.GetType() != typeof(double[]))
             {
                 throw new ArgumentException("Currently only numbers are supported on X and Y values, sorry!");
             }
 
-            if(XValues.Count()!= YValues.Count())
+            if (XValues.Count() != YValues.Count())
             {
                 throw new ArgumentException("The values of X and Y are not of same count. Not currently supported, sorry!");
             }
@@ -56,27 +58,27 @@ namespace grapher
             double maxY = YValues.Max();
             double minY = YValues.Min();
 
-            var chartWid = 500; var chartHei = 500;
+            var chartWid = width; var chartHei = height;
             var chartMargin = 50;
             chartWid = chartWid + chartMargin;
             chartHei = chartHei + chartMargin;
 
             var minPosX = chartMargin; var minPosY = chartMargin;
-            var maxPosX = chartWid-chartMargin; var maxPosY = chartHei-chartMargin;
+            var maxPosX = chartWid - chartMargin; var maxPosY = chartHei - chartMargin;
 
-            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+chartWid+"px' height='"+chartHei+"px' viewBox='0 0 "+chartWid+" "+chartHei+"' xml:space='preserve' >     \n";
-            
+            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='" + chartWid + "px' height='" + chartHei + "px' viewBox='0 0 " + chartWid + " " + chartHei + "' xml:space='preserve' >     \n";
+
             //draw graph background. The plot is always 500pt by 500pt
-            SVGContent += "<rect x='0' y='0' width='"+chartWid+"' height='"+chartHei+"' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
+            SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
 
             //draw axis and marking
             SVGContent += "<g name='xaxis'>  \n";
-            for (int i = 0; i < xAxisVals.Count; ++i )
+            for (int i = 0; i < xAxisVals.Count; ++i)
             {
-                var x = minPosX + (maxPosX - minPosX) * i / (xAxisVals.Count-1);
-                SVGContent += "<path d='M" + x + " "+chartMargin+" L" + x + " "+(chartHei-chartMargin)+"' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + x + "' y='" + (chartHei - chartMargin + 15) + "' style='fill:#666; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + xAxisVals[i] + "</text>";
-   
+                var x = minPosX + (maxPosX - minPosX) * i / (xAxisVals.Count - 1);
+                SVGContent += "<path d='M" + x + " " + chartMargin + " L" + x + " " + (chartHei - chartMargin) + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
+                SVGContent += "<text x='" + x + "' y='" + (chartHei - chartMargin + 15) + "' style='fill:#888; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + xAxisVals[i] + "</text>";
+
             }
             SVGContent += "</g>  \n";
 
@@ -85,16 +87,16 @@ namespace grapher
             {
                 var x = minPosY + (maxPosY - minPosY) * i / (yAxisVals.Count - 1);
                 SVGContent += "<path d='M" + chartMargin + " " + x + " L" + (chartWid - chartMargin) + " " + x + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='"+(chartMargin-10)+"' y='" + x + "' style='fill:#666; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + (chartMargin-10) + "," + x + ")'>" + yAxisVals[yAxisVals.Count - i -1] + "</text>";
+                SVGContent += "<text x='" + (chartMargin - 10) + "' y='" + x + "' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + (chartMargin - 10) + "," + x + ")'>" + yAxisVals[yAxisVals.Count - i - 1] + "</text>";
             }
             SVGContent += "</g>  \n";
-    
-            SVGContent += "<rect x='"+chartMargin+"' y='"+chartMargin+"' width='"+(chartWid-2*chartMargin)+"' height='"+(chartHei-2*chartMargin)+"' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
-            
+
+            SVGContent += "<rect x='" + chartMargin + "' y='" + chartMargin + "' width='" + (chartWid - 2 * chartMargin) + "' height='" + (chartHei - 2 * chartMargin) + "' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
+
             //draw values along axis
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (30) + "' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>Chart title</text>";
-            SVGContent += "<text x='" + (chartWid/2) + "' y='"+(chartHei-15)+"' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>X Values</text>";
-            SVGContent += "<text x='" + (chartMargin/2) + "' y='"+(chartHei/2)+"' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 "+(chartMargin/2)+", "+(chartHei/2)+")' text-anchor='middle'>Y Values</text>";
+            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (30) + "' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>" + chartTitle + "</text>";
+            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (chartHei - 15) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + XLabel + "</text>";
+            SVGContent += "<text x='" + (chartMargin / 2) + "' y='" + (chartHei / 2) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 " + (chartMargin / 2) + ", " + (chartHei / 2) + ")' text-anchor='middle'>" + YLabel + "</text>";
             //SVGContent += "</g>  \n";
 
             //draw the points on the graph
@@ -104,7 +106,7 @@ namespace grapher
                 var posX = (minPosX * (XValues[i] - xAxisVals[xAxisVals.Count - 1]) + maxPosX * (xAxisVals[0] - XValues[i])) / (xAxisVals[0] - xAxisVals[xAxisVals.Count - 1]);
                 var posY = (minPosY * (YValues[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - YValues[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
 
-                SVGContent += " <circle cx='"+posX+"' cy='"+(chartHei-posY)+"' r='3' fill='rgba(200, 30, 30, 0.7)' />";
+                SVGContent += " <circle cx='" + posX + "' cy='" + (chartHei - posY) + "' r='3' fill='rgba(200, 30, 30, 0.7)' />";
             }
 
 
@@ -112,7 +114,7 @@ namespace grapher
             SVGContent += "</svg>";
 
             //export as a SVG in desktop
-            var file = CreateNewSVGFile(filePath, "scatterPlot");
+            var file = CreateNewSVGFile(exportLocation, "scatterPlot");
             file.WriteLine(SVGContent);
             file.Close();
         }
@@ -125,7 +127,7 @@ namespace grapher
             if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
                 throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
 
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
+            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + "\\" + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
             return file;
         }
 
@@ -166,9 +168,9 @@ namespace grapher
             }
 
             axisValues.Add(currentAxisVal);
-            if(currentAxisVal == max)
+            if (currentAxisVal == max)
             {
-                axisValues.Add(currentAxisVal+diff);
+                axisValues.Add(currentAxisVal + diff);
             }
 
             return axisValues;
