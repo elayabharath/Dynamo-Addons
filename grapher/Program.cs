@@ -26,15 +26,8 @@ namespace grapher
 {
     public class Program
     {
-        /*
-        static void Main(string[] args)
-        {
-            List<double> x = new List<double> { 14.2, 16.4, 11.9, 15.2, 18.5, 22.1, 19.4, 25.1, 23.4, 18.1, 22.6, 17.2};
-            List<double> y = new List<double> { 215, 325, 185, 332, 406, 522, 412, 614, 544, 421, 445, 408 };//9.2, 1, 4.4, 6.3, 0.6, 1.2, 9, 3.4, 2.3, 3.1};
-            scatterPlot(x, y);
-        }
-        */
-        public static void scatterPlot(IList<double> XValues, IList<double> YValues)
+        
+        public static void scatterPlot(IList<double> XValues, IList<double> YValues, String filePath)
         {
 
             //sanitize the incoming data
@@ -54,54 +47,64 @@ namespace grapher
             }
 
 
+            //get all the axis values for X and Y axis
+            var xAxisVals = findAxis(XValues);
+            var yAxisVals = findAxis(YValues);
+
             double maxX = XValues.Max();
             double minX = XValues.Min();
-            double diffX = (maxX - minX) / 5;
-            maxX = maxX + diffX/2;
-            minX = minX - diffX / 2;
-            diffX = (maxX - minX) / 5;
-
             double maxY = YValues.Max();
             double minY = YValues.Min();
-            double diffY = (maxY - minY) / 5;
-            maxY = maxY + diffY / 2;
-            minY = minY - diffY / 2;
-            diffY = (maxY - minY) / 5;
 
-            var minPosX = 50; var minPosY = 50;
-            var maxPosX = 450; var maxPosY = 450;
+            var chartWid = 500; var chartHei = 500;
+            var chartMargin = 50;
+            chartWid = chartWid + chartMargin;
+            chartHei = chartHei + chartMargin;
 
-            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='500px' height='500px' viewBox='0 0 500 500' xml:space='preserve' >     \n";
+            var minPosX = chartMargin; var minPosY = chartMargin;
+            var maxPosX = chartWid-chartMargin; var maxPosY = chartHei-chartMargin;
+
+            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+chartWid+"px' height='"+chartHei+"px' viewBox='0 0 "+chartWid+" "+chartHei+"' xml:space='preserve' >     \n";
             
             //draw graph background. The plot is always 500pt by 500pt
-            SVGContent += "<rect x='0' y='0' width='500' height='500' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
+            SVGContent += "<rect x='0' y='0' width='"+chartWid+"' height='"+chartHei+"' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
 
             //draw axis and marking
-            SVGContent += "<g name='axis'>  \n";
-            for (int i = 0; i < 6; ++i)
+            SVGContent += "<g name='xaxis'>  \n";
+            for (int i = 0; i < xAxisVals.Count; ++i )
             {
-                var x = (400 / 5 * i) + 50; 
-                SVGContent += "<path d='M" + x + " 50 L" + x + " 450' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + x + "' y='465' style='fill:#666; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + Math.Round(minX + (diffX*i), 3) + "</text>";
-
-                SVGContent += "<path d='M50 " + x + " L450 " + x + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='40' y='" + x + "' style='fill:#666; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + 40 + "," + x + ")'>" + Math.Round(minY + ((5 - i) * diffY), 3) + "</text>";
+                var x = minPosX + (maxPosX - minPosX) * i / (xAxisVals.Count-1);
+                SVGContent += "<path d='M" + x + " "+chartMargin+" L" + x + " "+(chartHei-chartMargin)+"' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
+                SVGContent += "<text x='" + x + "' y='" + (chartHei - chartMargin + 15) + "' style='fill:#666; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + xAxisVals[i] + "</text>";
+   
             }
-
-            SVGContent += "<rect x='50' y='50' width='400' height='400' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
-            
-            //draw values along axis
-            SVGContent += "<text x='" + 250 + "' y='485' style='fill:#444; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>X Values</text>";
-            SVGContent += "<text x='" + 25 + "' y='250' style='fill:#444; font-family: sans-serif; font-size: 12px;' transform='rotate(270 25, 250)' text-anchor='middle'>Y Values</text>";
             SVGContent += "</g>  \n";
 
-            //draw the points on the graph
-            for (int i = 0; i < XValues.Count(); ++i)
+            SVGContent += "<g name='yaxis'>  \n";
+            for (int i = 0; i < yAxisVals.Count; ++i)
             {
-                var posX = (minPosX *( XValues[i] - maxX) + maxPosX * (minX - XValues[i])) / (minX - maxX);
-                var posY = (minPosY * (YValues[i] - maxY) + maxPosY * (minY - YValues[i])) / (minY - maxY);
+                var x = minPosY + (maxPosY - minPosY) * i / (yAxisVals.Count - 1);
+                SVGContent += "<path d='M" + chartMargin + " " + x + " L" + (chartWid - chartMargin) + " " + x + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
+                SVGContent += "<text x='"+(chartMargin-10)+"' y='" + x + "' style='fill:#666; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + (chartMargin-10) + "," + x + ")'>" + yAxisVals[yAxisVals.Count - i -1] + "</text>";
+            }
+            SVGContent += "</g>  \n";
+    
+            SVGContent += "<rect x='"+chartMargin+"' y='"+chartMargin+"' width='"+(chartWid-2*chartMargin)+"' height='"+(chartHei-2*chartMargin)+"' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
+            
+            //draw values along axis
+            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (30) + "' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>Chart title</text>";
+            SVGContent += "<text x='" + (chartWid/2) + "' y='"+(chartHei-15)+"' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>X Values</text>";
+            SVGContent += "<text x='" + (chartMargin/2) + "' y='"+(chartHei/2)+"' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 "+(chartMargin/2)+", "+(chartHei/2)+")' text-anchor='middle'>Y Values</text>";
+            //SVGContent += "</g>  \n";
 
-                SVGContent += " <circle cx='"+posX+"' cy='"+(500-posY)+"' r='3' fill='rgba(200, 30, 30, 0.8)' />";
+            //draw the points on the graph
+            for (int i = 0; i < XValues.Count; ++i)
+            {
+
+                var posX = (minPosX * (XValues[i] - xAxisVals[xAxisVals.Count - 1]) + maxPosX * (xAxisVals[0] - XValues[i])) / (xAxisVals[0] - xAxisVals[xAxisVals.Count - 1]);
+                var posY = (minPosY * (YValues[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - YValues[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
+
+                SVGContent += " <circle cx='"+posX+"' cy='"+(chartHei-posY)+"' r='3' fill='rgba(200, 30, 30, 0.7)' />";
             }
 
 
@@ -109,7 +112,7 @@ namespace grapher
             SVGContent += "</svg>";
 
             //export as a SVG in desktop
-            var file = CreateNewSVGFile("C:\\users\\t_elane\\Desktop\\", "scatterPlot");
+            var file = CreateNewSVGFile(filePath, "scatterPlot");
             file.WriteLine(SVGContent);
             file.Close();
         }
@@ -124,6 +127,51 @@ namespace grapher
 
             System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
             return file;
+        }
+
+        private static List<double> findAxis(IList<double> values)
+        {
+            double max = values.Max();
+            double min = values.Min();
+            double diff = (max - min) / 5;
+
+            ///calculate the significant digits of the diff
+            var digits = Math.Truncate((Math.Log10(diff)));
+
+            if (digits < 0)
+                digits = digits - 1;
+            //check the first integer of the number
+            double firstNum = Math.Truncate(diff / Math.Pow(10, digits));
+
+            diff = firstNum * Math.Pow(10, digits);
+
+            //get significant digits in difference
+            digits = Math.Truncate(Math.Log10(diff));
+
+            double minAxis = min * Math.Pow(10, digits);
+            minAxis = Math.Truncate(minAxis);
+            minAxis = minAxis / Math.Pow(10, digits);
+
+            if (minAxis == min)
+            {
+                minAxis = minAxis - diff;
+            }
+
+            List<double> axisValues = new List<double>();
+            double currentAxisVal = minAxis;
+            while (currentAxisVal < max)
+            {
+                axisValues.Add(currentAxisVal);
+                currentAxisVal = currentAxisVal + diff;
+            }
+
+            axisValues.Add(currentAxisVal);
+            if(currentAxisVal == max)
+            {
+                axisValues.Add(currentAxisVal+diff);
+            }
+
+            return axisValues;
         }
     }
 }

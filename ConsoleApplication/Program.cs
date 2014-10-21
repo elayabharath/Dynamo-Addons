@@ -15,8 +15,9 @@ namespace Application
         static void Main(string[] args)
         {
 
-
-            System.Console.ReadKey();
+           
         }
+
+
     }
 }
