@@ -1,4 +1,4 @@
-DynamoLibraryAddon
+Dynamo-Addons
 ==================
 
 Project to add useful add-ons that will stretch the capabilities of Dynamo library. For Dynamo project, please head out to https://github.com/DynamoDS/Dynamo
