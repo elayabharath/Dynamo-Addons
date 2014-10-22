@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoLibraryAddon", "ConsoleApplication\DynamoLibraryAddon.csproj", "{79C21615-0C7B-4B8F-89D3-6E5B6C2EB9FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "DataAnalysis\dataAnalysis.csproj", "{87B66F77-2B1C-4077-A3C1-0FD1DC6DDAD0}"
@@ -9,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySpirals", "Geometry
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svgPort", "svgPort\svgPort.csproj", "{875612B7-864D-4664-BE59-BCB2A63DBA8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grapher", "grapher\grapher.csproj", "{9EAEC452-7F91-470E-8957-BC10EEA18C97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grapher", "grapher\Grapher.csproj", "{9EAEC452-7F91-470E-8957-BC10EEA18C97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
