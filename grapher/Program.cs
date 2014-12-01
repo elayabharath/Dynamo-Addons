@@ -130,7 +130,10 @@ namespace Grapher
                 var posX = (minPosX * (XValues[i] - xAxisVals[xAxisVals.Count - 1]) + maxPosX * (xAxisVals[0] - XValues[i])) / (xAxisVals[0] - xAxisVals[xAxisVals.Count - 1]);
                 var posY = (minPosY * (YValues[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - YValues[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
 
-                SVGContent += " <circle cx='" + posX + "' cy='" + (chartHei - posY) + "' r='3' fill='rgba(200, 30, 30, 0.7)' />";
+                SVGContent += "<circle id='scatterPoint" + i + "' cx='" + posX + "' cy='" + (chartHei - posY) + "' r='3' fill='rgba(200, 30, 30, 0.7)' />";
+                SVGContent += "<text x='" + (posX + 20) + "' y='" + (chartHei - posY + 20) + "'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' >(" + XValues[i] + ", " + YValues[i] + ")";
+                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='scatterPoint" + i + ".mouseover' end='scatterPoint" + i + ".mouseout'/>";
+                SVGContent += "</text>";
             }
 
 
@@ -324,7 +327,10 @@ namespace Grapher
                 var x = minPosX + (maxPosX - minPosX) * i / (histogram.Count);
                 var y = (minPosY * (histogram[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - histogram[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
 
-                SVGContent += "<rect x='" + x + "' y='" + (chartHei - y) + "' width='" + ((maxPosX - minPosX) / (histogram.Count)) + "' height='" + (y - chartMargin) + "' style='stroke-width:1px; stroke: rgba(200, 30, 30, 0.9); fill: rgba(200, 30, 30, 0.7); shape-rendering: crispEdges;' />   \n";
+                SVGContent += "<rect id='histogramBar"+i+"' x='" + x + "' y='" + (chartHei - y) + "' width='" + ((maxPosX - minPosX) / (histogram.Count)) + "' height='" + (y - chartMargin) + "' style='stroke-width:1px; stroke: rgba(200, 30, 30, 0.9); fill: rgba(200, 30, 30, 0.7); shape-rendering: crispEdges;' />   \n";
+                SVGContent += "<text x='" + (x) + "' y='" + (chartHei - y - 10) + "'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' >" + histogram[i] + "<text/>";
+                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='histogramBar" + i + ".mouseover' end='histogramBar" + i + ".mouseout'/>";
+                SVGContent += "</text>";
             }
             SVGContent += "</g> \n";
 
@@ -735,7 +741,7 @@ namespace Grapher
                 percentages.Add((value * Math.PI * 2)/ sum);
             }
 
-            double lastPercentage = -90;
+            double lastPercentage = -1*Math.PI/2;
             string[] color = new string[]{"71d0f4", "e16452", "74c493", "f2d435", "8361a9",
                              "9abf88", "ef778c", "5698c4", "8c4646", "578b7e",
                              "cbc49d", "ef464c", "a8c542", "322f28", "9f3169",
