@@ -25,7 +25,25 @@ using Dynamo.Nodes;
 namespace Grapher
 {
 
-    public class scatterPlot
+    public class Plot
+    {
+        protected Plot()
+        {
+        }
+
+        protected static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
+        {
+            //check for invalid characters in the file name
+            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
+            if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
+                throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + "\\" + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
+            return file;
+        }
+    }
+
+    public class scatterPlot: Plot
     {
         private scatterPlot()
         {
@@ -127,17 +145,6 @@ namespace Grapher
             file.Close();
         }
 
-        private static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
-        {
-            //check for invalid characters in the file name
-            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
-            if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
-                throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
-
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + "\\" + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
-            return file;
-        }
-
         internal static List<double> findAxis(IList<double> values)
         {
             double max = values.Max();
@@ -147,7 +154,7 @@ namespace Grapher
             ///calculate the significant digits of the diff
             var digits = Math.Truncate((Math.Log10(diff)));
 
-            if (digits < 0)
+            if (digits <= 0)
                 digits = digits - 1;
             //check the first integer of the number
             double firstNum = Math.Truncate(diff / Math.Pow(10, digits));
@@ -185,7 +192,7 @@ namespace Grapher
 
     }
 
-    public class histogramPlot
+    public class histogramPlot: Plot
     {
         private histogramPlot()
         {
@@ -250,9 +257,6 @@ namespace Grapher
             //draw graph background. The plot is always 500pt by 500pt
             SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
 
-
-
-
             List<int> histogram = new List<int>(new int[intervals]);
 
             for (int i = 0; i < intervals; ++i)
@@ -309,7 +313,7 @@ namespace Grapher
                 var y = (minPosY * (histogram[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - histogram[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
 
                 SVGContent += "<rect id='histogramBar"+i+"' x='" + x + "' y='" + (chartHei - y) + "' width='" + ((maxPosX - minPosX) / (histogram.Count)) + "' height='" + (y - chartMargin) + "' style='stroke-width:1px; stroke: rgba(200, 30, 30, 0.9); fill: rgba(200, 30, 30, 0.7); shape-rendering: crispEdges;' />   \n";
-                SVGContent += "<text x='" + (x) + "' y='" + (chartHei - y - 10) + "'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' >" + histogram[i] + "<text/>";
+                SVGContent += "<text x='" + (x + ((maxPosX - minPosX) / (histogram.Count)) / 2) + "' y='" + (chartHei - y - 10) + "'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' text-anchor='middle'>" + histogram[i] + "<text/>";
                 SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='histogramBar" + i + ".mouseover' end='histogramBar" + i + ".mouseout'/>";
                 SVGContent += "</text>";
             }
@@ -337,17 +341,7 @@ namespace Grapher
             return histogram;
         }
 
-        private static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
-        {
-            //check for invalid characters in the file name
-            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
-            if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
-                throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
-
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + "\\" + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
-            return file;
-        }
-
+       
         private static List<double> findAxis(IList<int> values)
         {
             double max = values.Max();
@@ -396,11 +390,11 @@ namespace Grapher
 
     }
     
-
-    public class pieChartPlot
+    public class pieChartPlot: Plot
     {
         private pieChartPlot()
         {
+
         }
 
         public static void create(IList<String> Items, IList<double> Values, String exportLocation = "Desktop", String chartTitle = "Chart title", int width = 500, int height = 500)
@@ -428,7 +422,7 @@ namespace Grapher
             var chartHei = height;
 
             var chartCenterXY = chartWid / 2;
-            var chartRad = chartWid/2-20;
+            var chartRad = chartWid/2-40;
             var legendWid = 200;
             var legendHei = height;
 
@@ -454,6 +448,7 @@ namespace Grapher
                              "e99123", "878787", "6e8314", "2854a4", "555555"};
 
             var i = 0;
+            var j = 0;
             
             //generate charts
             foreach(var percentage in percentages)
@@ -465,18 +460,23 @@ namespace Grapher
                 }
 
                 var largeArcFlag = (percentage < Math.PI) ? 0 : 1;
-                
-                SVGContent += "<path d='M " + chartCenterXY + "," + chartCenterXY + 
+
+                SVGContent += "<path id='pieChartSector"+i+"' d='M " + chartCenterXY + "," + chartCenterXY + 
                     " l " + chartRad * Math.Cos(lastPercentage) + "," + chartRad * Math.Sin(lastPercentage) +
                     " A" + chartRad + "," + chartRad + " " + lastPercentage + " " + largeArcFlag + ",1 " + (chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage)) + "," + (chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage)) + " z' fill='#" + fillColor + "' stroke='rgba(0, 0, 0, 0.4)' stroke-width='0' />\n";
-                SVGContent += "<text x='" + ((chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage/2))) + "' y='" + ((chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage/2))) + "' fill='#444444' font-family='sans-serif' font-size='12'>" + "  " + (i) +"</text>";
+                
+                SVGContent += "<text x='" + ((chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage / 2))) + "' y='" + ((chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage / 2))) + "' fill='#444444' visibility='hidden' font-family='sans-serif' font-size='12'>" + "  " + Items[j ] +" ("+ Values[j] +")";
+                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='pieChartSector" + i + ".mouseover' end='pieChartSector" + i + ".mouseout'/>";
+                SVGContent += "</text>";
                 lastPercentage += percentage;
+                ++j;
             }
 
             var margin = 20;
-            SVGContent += "<text x='" + (margin + 25) + "' y='" + 15 + "' fill='#444444' font-family='sans-serif' font-size='12'>" + chartTitle+ "</text>";
+            SVGContent += "<text x='" + (chartWid/2) + "' y='" + 15 + "' fill='#444444' font-family='sans-serif' font-size='12' text-anchor='middle'>" + chartTitle + "</text>";
             
             i = 0;
+            j = 0;
             //generate legend for the chart
             foreach (var item in Items)
             {
@@ -484,9 +484,12 @@ namespace Grapher
                 {
                     i = 0;
                 }
+
+                var centage = Math.Round((percentages[i] / (Math.PI*2)) * 100, 2);
                 SVGContent += "<rect x='"+(chartWid+margin)+"' y='"+((i*25)+50)+"' width='20' height='20' rx='10' ry='10' fill='#"+color[i]+"' />\n";
-                SVGContent += "<text x='"+(chartWid+margin+25)+"' y='"+((i*25)+50+15)+"' fill='#444444' font-family='sans-serif' font-size='12'>"+"  "+(i+1)+" "+item+" ("+Values[i]+")</text>";
+                SVGContent += "<text x='"+(chartWid+margin+25)+"' y='"+((i*25)+50+15)+"' fill='#444444' font-family='sans-serif' font-size='12'>"+"  "+centage+"%  "+item+" ("+Values[j]+")</text>";
                 i = i + 1;
+                ++j;
             }
 
             //close the svg
@@ -496,17 +499,6 @@ namespace Grapher
             var file = CreateNewSVGFile(exportLocation, "pieChart");
             file.WriteLine(SVGContent);
             file.Close();
-        }
-
-        private static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
-        {
-            //check for invalid characters in the file name
-            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
-            if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
-                throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
-
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + "\\" + fileName + DateTime.Now.ToString("h_mm_ss_fff_tt") + ".svg");
-            return file;
         }
 
     }
