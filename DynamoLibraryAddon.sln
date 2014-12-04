@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svgPort", "svgPort\svgPort.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grapher", "grapher\Grapher.csproj", "{9EAEC452-7F91-470E-8957-BC10EEA18C97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebView", "WebView\WebView.csproj", "{C8BF93DB-0F5C-48B2-9B19-F1CD4DAC1E0E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,10 +37,6 @@ Global
 		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EAEC452-7F91-470E-8957-BC10EEA18C97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8BF93DB-0F5C-48B2-9B19-F1CD4DAC1E0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8BF93DB-0F5C-48B2-9B19-F1CD4DAC1E0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8BF93DB-0F5C-48B2-9B19-F1CD4DAC1E0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8BF93DB-0F5C-48B2-9B19-F1CD4DAC1E0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

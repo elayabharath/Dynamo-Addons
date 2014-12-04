@@ -35,12 +35,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamoCore">
-      <HintPath>..\..\Dynamo\bin\AnyCPU\Release\DynamoCore.dll</HintPath>
-    </Reference>
-    <Reference Include="ProtoCore">
-      <HintPath>..\..\Dynamo\bin\AnyCPU\Release\ProtoCore.dll</HintPath>
-    </Reference>
     <Reference Include="svg">
       <HintPath>.\svg.dll</HintPath>
     </Reference>
