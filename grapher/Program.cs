@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ProtoCore.AST.AssociativeAST;
-using Dynamo.Nodes;
+using System.Xml;
 /*
  * any graph always produces 500pts by 500pts
 
@@ -50,14 +49,13 @@ namespace Grapher
 
         }
 
-        public static void create(IList<double> XValues, IList<double> YValues, 
-                                  String exportLocation = "Desktop", String chartTitle = "Chart title", 
-                                  string XLabel = "X Values", string YLabel = "Y Values", 
-                                  int optionsFlag = 0, int width = 500, int height = 500)
+        public static System.Drawing.Bitmap create(IList<double> XValues, IList<double> YValues, 
+                                  String chartTitle = "Chart title", String XLabel = "X Values", String YLabel = "Y Values", 
+                                  int optionsFlag = 0, int width = 500, int height = 500, double plotRadius = 2.0, double opacity = 50.0, int saveFileOption = 0, String exportLocation = "Desktop")
         {
             if (exportLocation == "" || string.Compare(exportLocation, "Desktop") == 0 || exportLocation == null)
                 exportLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
+            
             //sanitize the incoming data
             if (XValues.Count() <= 0 || YValues.Count() <= 0)
             {
@@ -74,6 +72,8 @@ namespace Grapher
                 throw new ArgumentException("The values of X and Y are not of same count. Not currently supported, sorry!");
             }
 
+            opacity = (opacity <= 0.0) ? 0.01 : opacity / 100;
+            opacity = (opacity >= 1.0) ? 1.0 : opacity;
 
             //get all the axis values for X and Y axis
             var xAxisVals = findAxis(XValues);
@@ -90,52 +90,63 @@ namespace Grapher
             var minPosX = chartMargin; var minPosY = chartMargin;
             var maxPosX = chartWid - chartMargin; var maxPosY = chartHei - chartMargin;
 
-            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='" + chartWid + "px' height='" + chartHei + "px' viewBox='0 0 " + chartWid + " " + chartHei + "' xml:space='preserve' >     \n";
-
+            var SVGStringBuilder = new StringBuilder();
+            SVGStringBuilder.Append("<?xml version='1.0' encoding='UTF-8'?>");
+            SVGStringBuilder.Append(String.Format("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='{0}px' height='{1}px' viewBox='0 0 {2} {3}' xml:space='preserve' >\n", chartWid, chartHei, chartWid, chartHei));
+            
             //draw graph background. The plot is always 500pt by 500pt
-            SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
-
+            SVGStringBuilder.Append(String.Format("<rect x='0' y='0' width='{0}' height='{1}' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n", chartWid, chartHei));
+            
+            
             //draw axis and marking
-            SVGContent += "<g name='xaxis'>  \n";
+            SVGStringBuilder.Append("<g name='xaxis'>  \n");
+            
             for (int i = 0; i < xAxisVals.Count; ++i)
             {
                 var x = minPosX + (maxPosX - minPosX) * i / (xAxisVals.Count - 1);
-                SVGContent += "<path d='M" + x + " " + chartMargin + " L" + x + " " + (chartHei - chartMargin) + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + x + "' y='" + (chartHei - chartMargin + 15) + "' style='fill:#888; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + xAxisVals[i] + "</text>";
 
+                SVGStringBuilder.Append(String.Format("<path d='M {0} {1} L {2} {3}' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>\n", x, chartMargin, x, (chartHei-chartMargin)));
+                SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>{2}</text>", x, (chartHei - chartMargin + 15), xAxisVals[i]));
             }
-            SVGContent += "</g>  \n";
+            SVGStringBuilder.Append("</g>  \n");
+            
 
-            SVGContent += "<g name='yaxis'>  \n";
+            SVGStringBuilder.Append("<g name='yaxis'>  \n");
             for (int i = 0; i < yAxisVals.Count; ++i)
             {
                 var y = minPosY + (maxPosY - minPosY) * i / (yAxisVals.Count - 1);
-                SVGContent += "<path d='M" + chartMargin + " " + y + " L" + (chartWid - chartMargin) + " " + y + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + (chartMargin - 10) + "' y='" + y + "' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + (chartMargin - 10) + "," + y + ")'>" + yAxisVals[yAxisVals.Count - i - 1] + "</text>";
+                SVGStringBuilder.Append(String.Format("<path d='M{0} {1} L{2} {3}' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>\n", chartMargin, y, (chartWid - chartMargin), y));
+                SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 {2},{3})'>{4}</text>", (chartMargin - 10), y, (chartMargin - 10), y, (yAxisVals[yAxisVals.Count - i - 1])));
             }
-            SVGContent += "</g>  \n";
-
-            SVGContent += "<rect x='" + chartMargin + "' y='" + chartMargin + "' width='" + (chartWid - 2 * chartMargin) + "' height='" + (chartHei - 2 * chartMargin) + "' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
-
+            SVGStringBuilder.Append("</g>  \n");
+            
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='{2}' height='{3}' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />\n", chartMargin, chartMargin, (chartWid - 2 * chartMargin), (chartHei - 2 * chartMargin)));
+            
             //draw labels and title along axis
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (30) + "' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>" + chartTitle + "</text>";
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (chartHei - 15) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + XLabel + "</text>";
-            SVGContent += "<text x='" + (chartMargin / 2) + "' y='" + (chartHei / 2) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 " + (chartMargin / 2) + ", " + (chartHei / 2) + ")' text-anchor='middle'>" + YLabel + "</text>";
-            //SVGContent += "</g>  \n";
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>{2}</text>", (chartWid / 2), (30), chartTitle));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>{2}</text>", (chartWid / 2), (chartHei - 15), XLabel));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 {2},{3})' text-anchor='middle'>{4}</text>", (chartMargin / 2), (chartHei / 2), (chartMargin / 2), (chartHei / 2), YLabel));
 
-            var circleColor = "rgba(200, 30, 30, 0.7)";
-            var tempSVGContent = "";
+
+            
+
+            StringBuilder tempSVGStringBuilder = new StringBuilder();
+
+            var circleColor = String.Format("rgba(200, 30, 30, {0})", opacity);
+            
             //draw the points on the graph
             if (optionsFlag == 1)
             {
                 circleColor = "rgba(0, 0, 0, 0)";
-                tempSVGContent += "<path id='linePlot' d='";
+                tempSVGStringBuilder.Append("<path id='linePlot' d='");
+                //tempSVGContent += "<path id='linePlot' d='";
             }
 
             if (optionsFlag == 2)
             {
                 circleColor = "rgba(0, 0, 0, 0)";
-                tempSVGContent += "<path id='linePlot' d='";
+                tempSVGStringBuilder.Append("<path id='linePlot' d='");
+                //tempSVGContent += ;
             }
             
             for (int i = 0; i < XValues.Count; ++i)
@@ -146,48 +157,65 @@ namespace Grapher
 
                 if (i == 0 && optionsFlag ==1)
                 {
-                    tempSVGContent += "M " + posX + "," + (chartHei - posY) + " ";
+                    tempSVGStringBuilder.Append(String.Format("M {0},{1} ", posX,  (chartHei - posY)));
                 }
                 else if (i == 0 && optionsFlag == 2)
                 {
-                    tempSVGContent += "M " + posX + "," + (chartHei - chartMargin) + " " + "L " + posX + "," + (chartHei - posY) + " ";
+                    tempSVGStringBuilder.Append(String.Format("M {0},{1} L {2},{3} ", posX, (chartHei - chartMargin), posX, (chartHei - posY)));
                 }
                 else
                 {
-                    tempSVGContent += "L " + posX + "," + (chartHei - posY) + " ";
+                    tempSVGStringBuilder.Append(String.Format("L {0},{1} ", posX, (chartHei - posY)));
                 }
 
                 if (i == XValues.Count - 1 && optionsFlag == 2)
                 {
-                    tempSVGContent += "L " + posX + "," + (chartHei - chartMargin) + " ";
+                    tempSVGStringBuilder.Append(String.Format("L {0},{1} ", posX, (chartHei - chartMargin)));
                 }
 
-                SVGContent += "<circle class='scatterPoint' id='scatterPoint" + i + "' cx='" + posX + "' cy='" + (chartHei - posY) + "' r='3' fill='" + circleColor + "' />";
+                SVGStringBuilder.Append(String.Format("<circle class='scatterPoint' id='scatterPoint{0}' cx='{1}' cy='{2}' r='{3}' fill='{4}'/>", i, posX, (chartHei - posY), plotRadius, circleColor));
 
-                SVGContent += "<text id='tooltipText' x='" + (posX + 20) + "' y='" + (chartHei - posY + 20) + "'  visibility='hidden' fill='#000' font-family='sans-serif' font-size='12' >(" + XValues[i] + ", " + YValues[i] + ")";
-                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='scatterPoint" + i + ".mouseover' end='scatterPoint" + i + ".mouseout'/>";
-                SVGContent += "</text>";
+                SVGStringBuilder.Append(String.Format("<text id='tooltipText' x='{0}' y='{1}'  visibility='hidden' fill='#000' font-family='sans-serif' font-size='12' >({2},{3})", (posX + 20), (chartHei - posY + 20), XValues[i], YValues[i]));
+                SVGStringBuilder.Append(String.Format("<set attributeName='visibility' from='hidden' to='visible' begin='scatterPoint{0}.mouseover' end='scatterPoint{1}.mouseout'/>", i, i));
+                SVGStringBuilder.Append("</text>");
             }
 
 
             if(optionsFlag == 1)
-                tempSVGContent += "' style='stroke-width:2px; stroke: rgba(200, 30, 30, 0.7); fill:none; ' />";
+                tempSVGStringBuilder.Append("' style='stroke-width:2px; stroke: rgba(200, 30, 30, 0.7); fill:none; ' />");
             else if(optionsFlag == 2)
-                tempSVGContent += "' style='stroke-width:0; stroke: rgba(200, 30, 30, 0.7); fill:rgba(200, 30, 30, 0.5); ' />";
+                tempSVGStringBuilder.Append("' style='stroke-width:0; stroke: rgba(200, 30, 30, 0.7); fill:rgba(200, 30, 30, 0.5); ' />");
 
-            SVGContent += tempSVGContent;
+            SVGStringBuilder.Append(tempSVGStringBuilder.ToString());
+            SVGStringBuilder.Append("<defs><style type='text/css'><![CDATA[ .scatterPoint:hover { stroke: rgba(200, 30, 30, 1); stroke-width:1px; } ]]></style></defs>");
+            SVGStringBuilder.Append("</svg>");
 
-            SVGContent += "<defs><style type='text/css'><![CDATA[ .scatterPoint:hover { fill: rgba(200, 30, 30, 1); stroke: rgba(200, 30, 30, 0.2); stroke-width:5px; } ]]></style></defs>";
-            
-    
-  
-            //close the svg
-            SVGContent += "</svg>";
+            var SVGContent = SVGStringBuilder.ToString();
             //SVGContent += "<style> #tooltipText {  }</style>";
             //export as a SVG in desktop
-            var file = CreateNewSVGFile(exportLocation, "scatterPlot");
-            file.WriteLine(SVGContent);
-            file.Close();
+
+
+            if (saveFileOption == 1)
+            {
+                var file = CreateNewSVGFile(exportLocation, "scatterPlot");
+                file.WriteLine(SVGContent);
+                file.Close();
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(SVGContent);
+
+            Svg.SvgDocument svgdoc = new Svg.SvgDocument();
+            
+            var xmlStream = new System.IO.MemoryStream(UTF8Encoding.Default.GetBytes(doc.InnerXml));
+            svgdoc = Svg.SvgDocument.Open(xmlStream);
+
+            var imageStream = new System.IO.MemoryStream();
+            svgdoc.Draw().Save(imageStream, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            System.Drawing.Bitmap imageFile = new System.Drawing.Bitmap(imageStream);
+            return imageFile;
+            
         }
 
         internal static List<double> findAxis(IList<double> values)
