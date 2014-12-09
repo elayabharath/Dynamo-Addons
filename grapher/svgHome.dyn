@@ -1,0 +1,12 @@
+<Workspace Version="0.7.5.3382" X="0" Y="0" zoom="1" Description="" Category="" Name="Home">
+  <Elements>
+    <Dynamo.Nodes.svgCore type="Dynamo.Nodes.svgCore" guid="e73c2f92-208c-4df2-a125-cd2663d3391d" nickname="SVG Viewer" x="868" y="167" isVisible="true" isUpstreamVisible="true" lacing="Disabled" />
+    <Dynamo.Nodes.StringInput type="Dynamo.Nodes.StringInput" guid="6214d238-2f8e-4c5a-9f4a-ab2247d3f085" nickname="String" x="451" y="174" isVisible="true" isUpstreamVisible="true" lacing="Disabled">
+      <System.String value="C:\Users\t_elane\Desktop\plot.svg" />
+    </Dynamo.Nodes.StringInput>
+  </Elements>
+  <Connectors>
+    <Dynamo.Models.ConnectorModel start="6214d238-2f8e-4c5a-9f4a-ab2247d3f085" start_index="0" end="e73c2f92-208c-4df2-a125-cd2663d3391d" end_index="0" portType="0" />
+  </Connectors>
+  <Notes />
+</Workspace>

@@ -1,0 +1,37 @@
+<Workspace Version="0.7.4.3245" X="526.8821088607" Y="116.169032343857" zoom="0.808219866393029" Description="" Category="" Name="Home">
+  <Elements>
+    <Dynamo.Nodes.DSFunction type="Dynamo.Nodes.DSFunction" guid="e4823ce0-23a3-44ec-a98e-c6b0033e2012" nickname="scatterPlot.create" x="484" y="54.5" isVisible="true" isUpstreamVisible="true" lacing="Shortest" assembly="grapher.dll" function="Grapher.scatterPlot.create@double[],double[],var[]" />
+    <Dynamo.Nodes.DSFunction type="Dynamo.Nodes.DSFunction" guid="9f4d305f-564e-4c99-8e26-84fedc24f68d" nickname="scatterPlot.scatterPlotOptions" x="40" y="262.5" isVisible="true" isUpstreamVisible="true" lacing="Shortest" assembly="grapher.dll" function="Grapher.scatterPlot.scatterPlotOptions@string,string,string,int,int,int,double,double,int,string">
+      <PortInfo index="0" default="True" />
+      <PortInfo index="1" default="True" />
+      <PortInfo index="2" default="True" />
+      <PortInfo index="3" default="True" />
+      <PortInfo index="4" default="True" />
+      <PortInfo index="5" default="True" />
+      <PortInfo index="6" default="True" />
+      <PortInfo index="7" default="True" />
+      <PortInfo index="8" default="True" />
+      <PortInfo index="9" default="True" />
+    </Dynamo.Nodes.DSFunction>
+    <Dynamo.Nodes.DSFunction type="Dynamo.Nodes.DSFunction" guid="9935e66e-c767-44a4-af47-b4f4bca8de06" nickname="Math.RandomList" x="45" y="-131.5" isVisible="true" isUpstreamVisible="true" lacing="Shortest" assembly="DSCoreNodes.dll" function="DSCore.Math.RandomList@int" />
+    <Dynamo.Nodes.CodeBlockNodeModel type="Dynamo.Nodes.CodeBlockNodeModel" guid="d4d592ec-a0b7-4153-8b35-f49a5037f973" nickname="Code Block" x="-226" y="-109" isVisible="true" isUpstreamVisible="true" lacing="Disabled" CodeText="50;" ShouldFocus="false" />
+    <Dynamo.Nodes.WatchImageCore type="Dynamo.Nodes.WatchImageCore" guid="2bdf869c-5df0-4772-a837-f52da2d98219" nickname="Watch Image" x="747" y="32.5" isVisible="true" isUpstreamVisible="true" lacing="Disabled" />
+    <Dynamo.Nodes.CodeBlockNodeModel type="Dynamo.Nodes.CodeBlockNodeModel" guid="b28514c4-a30f-4c73-8722-81b2ef493d04" nickname="Code Block" x="-252" y="316" isVisible="true" isUpstreamVisible="true" lacing="Disabled" CodeText="2;" ShouldFocus="false" />
+    <Dynamo.Nodes.CodeBlockNodeModel type="Dynamo.Nodes.CodeBlockNodeModel" guid="d565ce5b-175c-4f84-8587-93fab75b85d0" nickname="Code Block" x="40" y="39" isVisible="true" isUpstreamVisible="true" lacing="Disabled" CodeText="0..10..#50;" ShouldFocus="false" />
+    <Dynamo.Nodes.IntegerSlider type="Dynamo.Nodes.IntegerSlider" guid="9d287994-5e2e-4e7b-9b8b-2358d9012170" nickname="Integer Slider" x="-266.672142645473" y="488.723986785554" isVisible="true" isUpstreamVisible="true" lacing="Disabled">
+      <System.Int32>4</System.Int32>
+      <Range min="0" max="10" />
+    </Dynamo.Nodes.IntegerSlider>
+    <Dynamo.Nodes.CodeBlockNodeModel type="Dynamo.Nodes.CodeBlockNodeModel" guid="63e6c292-c0ff-45ca-9612-19abc01fa6a7" nickname="Code Block" x="-142" y="394" isVisible="true" isUpstreamVisible="true" lacing="Disabled" CodeText="1;" ShouldFocus="false" />
+  </Elements>
+  <Connectors>
+    <Dynamo.Models.ConnectorModel start="e4823ce0-23a3-44ec-a98e-c6b0033e2012" start_index="0" end="2bdf869c-5df0-4772-a837-f52da2d98219" end_index="0" portType="0" />
+    <Dynamo.Models.ConnectorModel start="9f4d305f-564e-4c99-8e26-84fedc24f68d" start_index="0" end="e4823ce0-23a3-44ec-a98e-c6b0033e2012" end_index="2" portType="0" />
+    <Dynamo.Models.ConnectorModel start="9935e66e-c767-44a4-af47-b4f4bca8de06" start_index="0" end="e4823ce0-23a3-44ec-a98e-c6b0033e2012" end_index="1" portType="0" />
+    <Dynamo.Models.ConnectorModel start="d4d592ec-a0b7-4153-8b35-f49a5037f973" start_index="0" end="9935e66e-c767-44a4-af47-b4f4bca8de06" end_index="0" portType="0" />
+    <Dynamo.Models.ConnectorModel start="d565ce5b-175c-4f84-8587-93fab75b85d0" start_index="0" end="e4823ce0-23a3-44ec-a98e-c6b0033e2012" end_index="0" portType="0" />
+    <Dynamo.Models.ConnectorModel start="9d287994-5e2e-4e7b-9b8b-2358d9012170" start_index="0" end="9f4d305f-564e-4c99-8e26-84fedc24f68d" end_index="6" portType="0" />
+    <Dynamo.Models.ConnectorModel start="63e6c292-c0ff-45ca-9612-19abc01fa6a7" start_index="0" end="9f4d305f-564e-4c99-8e26-84fedc24f68d" end_index="8" portType="0" />
+  </Connectors>
+  <Notes />
+</Workspace>
