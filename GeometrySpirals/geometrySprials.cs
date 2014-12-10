@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using Autodesk.DesignScript.Geometry;
 
 
-public class spirals
+public class Spiral
 {
+    private Spiral()
+    {
+    }
 
     private static double goldenRatio()
     {
@@ -24,15 +27,19 @@ public class spirals
         return 2.7182818284;
     }
 
-    public static NurbsCurve fibonnaciSpiral(double angle, double scale = 1)
-    {
-        if (angle == 0.0 && scale == 0.0)
-        { throw new ArgumentException("The angle and scale values can't be 0."); }
-        else if (angle == 0.0)
-        { throw new ArgumentException("The angle value can't be 0.", "angle"); }
-        else if (scale == 0.0)
-        { throw new ArgumentException("The scale value can't be 0.", "scale"); }
 
+    /// <summary>
+    ///     A golden spiral is a logarithmic spiral whose growth factor is φ, the golden ratio.
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <search>golden,fibonacci</search>
+    public static NurbsCurve Golden(double angle=720)
+    {
+        if (angle == 0.0)
+        { throw new ArgumentException("The angle and scale values can't be 0."); }
+
+        angle = (angle < 0.0) ? -1 * angle : angle;
+        
         int numPts = 1000;
         var pts = new List<Point>();
 
@@ -44,17 +51,23 @@ public class spirals
         for (int i = 0; i < numPts; ++i)
         {
             double currAngle = (double)i / 1000.0 * angle;
-            double radius = scale * Math.Pow(c, currAngle);
+            double radius = Math.Pow(c, currAngle);
 
-            double xVal = scale * Math.Cos(currAngle) * Math.Pow(c, currAngle);
-            double yVal = scale * Math.Sin(currAngle) * Math.Pow(c, currAngle);
+            double xVal = Math.Cos(currAngle) * Math.Pow(c, currAngle);
+            double yVal = Math.Sin(currAngle) * Math.Pow(c, currAngle);
 
             pts.Add(Point.ByCoordinates(xVal, yVal, 0));
         }
 
         return NurbsCurve.ByControlPoints(pts);
     }
-    public static PolyCurve fermatSpiral(double angle)
+
+    /// <summary>
+    ///     Fermat's spiral (also known as a parabolic spiral) follows the equation r = +/- Theta^0.5
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <search>golden,fibonacci</search>
+    public static PolyCurve Fermat(double angle=3600)
     {
         if (angle == 0.0)
         { throw new ArgumentException("The angle value can't be 0.", "angle"); }
@@ -91,7 +104,16 @@ public class spirals
 
         return PolyCurve.ByPoints(pts);
     }
-    public static NurbsCurve archimedeanSpiral(double angle, double a, double b)
+
+    /// <summary>
+    ///     The Archimedean spiral is formed by locus of points corresponding to the locations over time of a point moving away from a 
+    ///     fixed point with a constant speed along a line which rotates with constant angular velocity.
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <param name="innerRadius">Changing this will change the starting place of the spiral</param>
+    /// <param name="turnDistance">This controls the distance between successive turnings.</param>
+    /// <search>archimedes,arithmetic</search>
+    public static NurbsCurve Archimedean(double angle = 3600, double innerRadius = 0.2, double turnDistance = 0.2)
     {
         if (angle == 0.0)
         { throw new ArgumentException("The angle value can't be 0.", "angle"); }
@@ -109,7 +131,7 @@ public class spirals
         for (int i = 0; i < numPts; ++i)
         {
             double currAngle = (double)i / 1000.0 * angle;
-            double radius = a + b * currAngle;
+            double radius = innerRadius + turnDistance * currAngle;
 
             double xVal = radius * Math.Cos(currAngle);
             double yVal = radius * Math.Sin(currAngle);
@@ -119,7 +141,52 @@ public class spirals
 
         return NurbsCurve.ByPoints(pts);
     }
-    public static NurbsCurve hyperbolicSprial(double angle, double a)
+
+    /// <summary>
+    ///     A hyperbolic spiral is a transcendental plane curve also known as a reciprocal spiral, this the opposite of an Archimedean spiral and is a type of Cotes' spiral.
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <param name="innerScale">Changing this will expand the inner circular part of the spiral</param>
+    /// <search>Hyperbolic,cotes,archimedes</search>
+    public static PolyCurve Hyperbolic(double angle = 3600, double innerScale = 100)
+    {
+        if (angle == 0.0)
+        { throw new ArgumentException("The angle value can't be 0.", "angle"); }
+
+        if (angle < 0.0)
+        {
+            angle = angle * -1;
+        }
+
+        int numPts = 1000;
+        angle = degToRad(angle);
+
+        var pts = new List<Point>();
+
+        for (int i = 30; i < numPts; ++i)
+        {
+            double currAngle = (double)i / 1000.0 * angle;
+            double radius = innerScale / currAngle;
+
+            double xVal = radius * Math.Cos(currAngle);
+            double yVal = radius * Math.Sin(currAngle);
+
+            pts.Add(Point.ByCoordinates(xVal, yVal, 0));
+        }
+
+        return PolyCurve.ByPoints(pts);
+    }
+
+    /// <summary>
+    ///     The logarithmic spiral can be distinguished from the Archimedean spiral by the fact that 
+    ///     the distances between the turnings of a logarithmic spiral increase in geometric progression,
+    ///      while in an Archimedean spiral these distances are constant.
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <param name="scale">Determines the scale of the spiral</param>
+    /// <param name="growth">This determines the factor of increase along the spiral. WARNING: Values beyond 0.3 may not give any meaningful visualization</param>
+    /// <search>log,equiangular,growth,marvelous</search>
+    public static NurbsCurve Logarithmic(double angle = 1800, double scale = 0.5, double growth = 0.1)
     {
         if (angle == 0.0)
         { throw new ArgumentException("The angle value can't be 0.", "angle"); }
@@ -137,7 +204,7 @@ public class spirals
         for (int i = 0; i < numPts; ++i)
         {
             double currAngle = (double)i / 1000.0 * angle;
-            double radius = a / currAngle;
+            double radius = scale * Math.Pow(eulerConstant(), (growth * currAngle));
 
             double xVal = radius * Math.Cos(currAngle);
             double yVal = radius * Math.Sin(currAngle);
@@ -147,39 +214,22 @@ public class spirals
 
         return NurbsCurve.ByPoints(pts);
     }
-    public static NurbsCurve logSpiral(double angle, double a, double b)
-    {
-        if (angle == 0.0)
-        { throw new ArgumentException("The angle value can't be 0.", "angle"); }
 
-        if (angle < 0.0)
-        {
-            angle = angle * -1;
-        }
 
-        int numPts = 1000;
-        angle = degToRad(angle);
-
-        var pts = new List<Point>();
-
-        for (int i = 0; i < numPts; ++i)
-        {
-            double currAngle = (double)i / 1000.0 * angle;
-            double radius = a * Math.Pow(eulerConstant(), (b*currAngle));
-
-            double xVal = radius * Math.Cos(currAngle);
-            double yVal = radius * Math.Sin(currAngle);
-
-            pts.Add(Point.ByCoordinates(xVal, yVal, 0));
-        }
-
-        return NurbsCurve.ByPoints(pts);
-    }
-    public static NurbsCurve lituusSpiral(double angle)
+    /// <summary>
+    ///     A lituus is a spiral in which the angle is inversely proportional to the square of the radius.
+    /// </summary>
+    /// <param name="angle">360 completes 1 circulation</param>
+    /// <param name="scale">Determines the scale of the spiral</param>
+    /// <search>lituus,cotes</search>
+    public static NurbsCurve Lituus(double angle = 3600, double scale = 5)
     {
         
         if (angle == 0.0)
         { throw new ArgumentException("The angle value can't be 0.", "angle"); }
+
+        if (scale == 0.0)
+        { throw new ArgumentException("The scale value can't be 0.", "scale"); }
 
         if (angle < 0.0)
         {
@@ -196,29 +246,36 @@ public class spirals
             double currAngle = (double)i / 1000.0 * angle;
             double radius = Math.Sqrt(1/currAngle);
 
-            double xVal = radius * Math.Cos(currAngle);
-            double yVal = radius * Math.Sin(currAngle);
+            double xVal = scale * radius * Math.Cos(currAngle);
+            double yVal = scale * radius * Math.Sin(currAngle);
 
             pts.Add(Point.ByCoordinates(xVal, yVal, 0));
         }
 
         return NurbsCurve.ByPoints(pts);
     }
-    public static NurbsCurve theodorusSpiral(int n)
+
+
+    /// <summary>
+    ///     The spiral of Theodorus is a spiral composed of contiguous right triangles
+    /// </summary>
+    /// <param name="numberRot">Determines the number of turns in the spiral</param>
+    /// <search>square root,einstein,pythagorean</search>
+    public static NurbsCurve Theodorus(int numberRot=100)
     {
-        if (n == 0)
+        if (numberRot == 0)
         { throw new ArgumentException("The angle value can't be 0.", "angle"); }
 
-        if (n < 0)
+        if (numberRot < 0)
         {
-            n = n * -1;
+            numberRot = numberRot * -1;
         }
 
         var pts = new List<Point>();
         double radius = 1;
         double currAngle = 0;
 
-        for (int i = 1; i <= n; ++i)
+        for (int i = 1; i <= numberRot; ++i)
         {
             radius = Math.Sqrt(i);
             double xVal = radius * Math.Cos(currAngle);
@@ -228,12 +285,18 @@ public class spirals
             pts.Add(Point.ByCoordinates(xVal, yVal, 0));
 
             currAngle = currAngle + Math.Atan(1 / Math.Sqrt(i));
-            //radius = radius + Math.Sqrt(n+1) - Math.Sqrt(n);
         }
 
         return NurbsCurve.ByControlPoints(pts, 1, false);
     }
-    public static NurbsCurve breakSpiral(Curve spiral, int numBreaks)
+
+    /// <summary>
+    ///     Breaks the continous spiral into a series of straight lines
+    /// </summary>
+    /// <param name="spiral">The spiral to break</param>
+    /// <param name="numBreaks">The number of lines to generate</param>
+    /// <search>break,divide</search>
+    public static NurbsCurve getBrokenSpiral(Curve spiral, int numBreaks=100)
     {
         if (numBreaks == 0)
         { throw new ArgumentException("The numPts needs to be non-zero positive integer"); }
@@ -248,7 +311,14 @@ public class spirals
 
         return NurbsCurve.ByControlPoints(pts, 1, false);
     }
-    public static List<Point> getPointsAtEqualDistance(Curve spiral, int numPts)
+
+    /// <summary>
+    ///     Gets the points at equal distance on the spiral
+    /// </summary>
+    /// <param name="spiral">The spiral to plot the points on</param>
+    /// <param name="numPts">The number of points needed on the curve</param>
+    /// <search>divide</search>
+    public static List<Point> getPointsAtEqualDistance(Curve spiral, int numPts=100)
     {
         if (numPts == 0)
         { throw new ArgumentException("The numPts needs to be non-zero positive integer"); }
