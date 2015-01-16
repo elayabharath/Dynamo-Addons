@@ -8,7 +8,7 @@ using Autodesk.DesignScript.Geometry;
 using System.Drawing;
 using System.Net;
 using System.IO;
-//using System.Drawing;
+
 
 namespace GPS
 {
@@ -188,5 +188,123 @@ namespace GPS
             return str.ToString();
         }
 
+        public static void getElevationValues(string gpxFile)
+        {
+            List<double> elevationData = new List<double>();
+
+            List<string> trackSegments = new List<string>();
+
+            //open the xml doc
+            XmlDocument doc = new XmlDocument();
+            doc.Load(gpxFile);
+
+            //namespace of the gps viewer
+            string namespc = "http://www.topografix.com/GPX/1/1";
+            XmlNamespaceManager mgr = new XmlNamespaceManager(doc.NameTable);
+            mgr.AddNamespace("", namespc);
+
+            //get all trks
+            //only one track is going to be supported because of the limitation in url encoding
+            XmlNodeList trksList = doc.GetElementsByTagName("trk");
+            List<XmlNode> trks = new List<XmlNode>(trksList.Cast<XmlNode>());
+
+            //foreach code for all tracks -- but we will take only the first track
+            //foreach (var trk in trks)
+            //{
+            XmlNode trk = trks[0];
+            List<XmlNode> trksegs = ProcessNodes(trk.ChildNodes, "trkseg");
+
+            List<Autodesk.DesignScript.Geometry.Point> pts = new List<Autodesk.DesignScript.Geometry.Point>();
+
+            //get aggregate of all the trkpoints and store it in pts -- note we just approximately join the tracksegments
+            foreach (XmlNode trkseg in trksegs)
+            {
+                List<XmlNode> trkpts = ProcessNodes(trkseg.ChildNodes, "trkpt");
+
+                foreach (XmlNode trkpt in trkpts)
+                {
+                    List<XmlNode> eleList = ProcessNodes(trkpt.ChildNodes, "ele");
+                    foreach (XmlNode ele in eleList)
+                    {
+                        elevationData.Add(Double.Parse(ele.InnerText));
+                    }
+                }
+            }
+
+            //return elevationData;
+        }
+
+        public static List<double> getVelocityValues(string gpxFile)
+        {
+            List<double> velocity = new List<double>();
+
+            List<string> trackSegments = new List<string>();
+            List<DateTime> time = new List<DateTime>();
+            //open the xml doc
+            XmlDocument doc = new XmlDocument();
+            doc.Load(gpxFile);
+
+            //namespace of the gps viewer
+            string namespc = "http://www.topografix.com/GPX/1/1";
+            XmlNamespaceManager mgr = new XmlNamespaceManager(doc.NameTable);
+            mgr.AddNamespace("", namespc);
+
+            //get all trks
+            //only one track is going to be supported because of the limitation in url encoding
+            XmlNodeList trksList = doc.GetElementsByTagName("trk");
+            List<XmlNode> trks = new List<XmlNode>(trksList.Cast<XmlNode>());
+
+            //foreach code for all tracks -- but we will take only the first track
+            //foreach (var trk in trks)
+            //{
+            XmlNode trk = trks[0];
+            List<XmlNode> trksegs = ProcessNodes(trk.ChildNodes, "trkseg");
+
+            List<Autodesk.DesignScript.Geometry.Point> pts = new List<Autodesk.DesignScript.Geometry.Point>();
+
+            //get aggregate of all the trkpoints and store it in pts -- note we just approximately join the tracksegments
+            foreach (XmlNode trkseg in trksegs)
+            {
+                List<XmlNode> trkpts = ProcessNodes(trkseg.ChildNodes, "trkpt");
+
+                foreach (XmlNode trkpt in trkpts)
+                {
+                    double tempLat = Double.Parse(trkpt.Attributes["lat"].Value);
+                    double tempLng = Double.Parse(trkpt.Attributes["lon"].Value);
+                    Autodesk.DesignScript.Geometry.Point m = Autodesk.DesignScript.Geometry.Point.ByCoordinates(tempLat, tempLng, 0);
+                    pts.Add(m);
+
+                    List<XmlNode> eleList = ProcessNodes(trkpt.ChildNodes, "time");
+                    foreach (XmlNode ele in eleList)
+                    {
+                        time.Add(DateTime.Parse(ele.InnerText));
+                    }
+                }
+            }
+
+            for (int i = 0; i < pts.Count - 1; ++i)
+            {
+                velocity.Add(calculateVelocity(pts[i].X, pts[i].Y, pts[i + 1].X, pts[i + 1].Y, time[i], time[i + 1]));
+                Console.WriteLine(velocity[i]);
+            }
+
+            return velocity;
+        }
+
+        private static double calculateVelocity(double lat1, double long1, double lat2, double long2, DateTime start, DateTime end)
+        {
+            TimeSpan timeDiff = (end - start);
+
+            double dlong = (long2 - long1) * Math.PI / 180;
+            double dlat = (lat2 - lat1) * Math.PI / 180;
+
+            // Haversine formula:
+            double R = 6371;
+            double a = Math.Sin(dlat / 2) * Math.Sin(dlat / 2) + Math.Cos(lat1) * Math.Cos(lat2) * Math.Sin(dlong / 2) * Math.Sin(dlong / 2);
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            double d = R * c;
+
+            return d / (timeDiff.TotalSeconds);
+        }
     }
 }

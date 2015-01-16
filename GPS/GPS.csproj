@@ -35,10 +35,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ProtoGeometry">
+    <Reference Include="ProtoGeometry, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files\Dynamo 0.7\ProtoGeometry.dll</HintPath>
     </Reference>
-    <Reference Include="ProtoInterface">
+    <Reference Include="ProtoInterface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files\Dynamo 0.7\ProtoInterface.dll</HintPath>
     </Reference>
     <Reference Include="System" />

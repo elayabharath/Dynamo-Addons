@@ -46,6 +46,17 @@ namespace Grapher
     {
         protected scatterPlot() { }
 
+        public static System.Drawing.Bitmap create(IList<double> Values, List<object> chartOptions = null)
+        {
+            double[] list = new double[Values.Count];
+            
+            for (int i = 0; i < Values.Count; ++i)
+            {
+                list[i] = i;
+            }
+            return create(list, Values, chartOptions);
+        }
+
         public static System.Drawing.Bitmap create(IList<double> XValues, IList<double> YValues, List<object> chartOptions = null)
         {
             //sanitize the incoming data
@@ -73,11 +84,12 @@ namespace Grapher
             int LineOrAreaFlag;
             double plotRadius;
             double opacity;
+            int interactiveOption;
             int saveAsSVGOption;
             string saveLocation;
 
             //read all options here
-            if (chartOptions.Count == 10)
+            if (chartOptions.Count == 11)
             {
                 chartTitle = chartOptions[0].ToString();
                 XLabel = chartOptions[1].ToString();
@@ -87,8 +99,9 @@ namespace Grapher
                 LineOrAreaFlag = Convert.ToInt32(chartOptions[5]);
                 plotRadius = Convert.ToDouble(chartOptions[6]);
                 opacity = Convert.ToDouble(chartOptions[7]);
-                saveAsSVGOption = Convert.ToInt32(chartOptions[8]);
-                saveLocation = chartOptions[9].ToString();
+                interactiveOption = Convert.ToInt32(chartOptions[8]);
+                saveAsSVGOption = Convert.ToInt32(chartOptions[9]);
+                saveLocation = chartOptions[10].ToString();
             }
             else
             {
@@ -100,6 +113,7 @@ namespace Grapher
                 LineOrAreaFlag = 0;
                 plotRadius = 2.0;
                 opacity = 50;
+                interactiveOption = 0;
                 saveAsSVGOption = 0;
                 saveLocation = "Desktop";
             }
@@ -209,10 +223,12 @@ namespace Grapher
                 }
 
                 SVGStringBuilder.Append(String.Format("<circle class='sp' id='sp{0}' cx='{1}' cy='{2}' r='{3}' fill='{4}' style='fill-opacity:{5};'/>", i, posX, (chartHei - posY), plotRadius, circleColor, opacity));
-
-                SVGStringBuilder.Append(String.Format("<text id='tt' x='{0}' y='{1}'  visibility='hidden' fill='#000' font-family='sans-serif' font-size='12' >({2},{3})", (posX + 20), (chartHei - posY + 20), XValues[i], YValues[i]));
-                SVGStringBuilder.Append(String.Format("<set attributeName='visibility' from='hidden' to='visible' begin='sp{0}.mouseover' end='sp{1}.mouseout'/>", i, i));
-                SVGStringBuilder.Append("</text>");
+                if (interactiveOption == 1)
+                {
+                    SVGStringBuilder.Append(String.Format("<text id='tt' x='{0}' y='{1}'  visibility='hidden' fill='#000' font-family='sans-serif' font-size='12' >({2},{3})", (posX + 20), (chartHei - posY + 20), XValues[i], YValues[i]));
+                    SVGStringBuilder.Append(String.Format("<set attributeName='visibility' from='hidden' to='visible' begin='sp{0}.mouseover' end='sp{1}.mouseout'/>", i, i));
+                    SVGStringBuilder.Append("</text>");
+                }
             }
 
 
@@ -254,7 +270,7 @@ namespace Grapher
 
         public static List<object> chartOptions(String chartTitle = "Chart title", String XLabel = "X Values", String YLabel = "Y Values",
                                   int chartAreaWidth = 500, int chartAreaHeight = 500, int LineOrAreaFlag = 0, double plotRadius = 2.0, 
-                                  double opacity = 50.0, int saveAsSVGOption = 0, String saveLocation = "Desktop")
+                                  double opacity = 50.0, int interactiveOption = 0, int saveAsSVGOption = 0, String saveLocation = "Desktop")
         {
             var optionsList = new List<object>();
             optionsList.Add(chartTitle);
@@ -265,6 +281,7 @@ namespace Grapher
             optionsList.Add(LineOrAreaFlag);
             optionsList.Add(plotRadius);
             optionsList.Add(opacity);
+            optionsList.Add(interactiveOption);
             optionsList.Add(saveAsSVGOption);
             optionsList.Add(saveLocation);
 
@@ -318,6 +335,152 @@ namespace Grapher
 
     }
 
+    public class guage : Plot
+    {
+        protected guage() { }
+
+        public static System.Drawing.Bitmap createLinear(double valueToMonitor, List<object> chartOptions = null)
+        {
+            //sanitize the incoming data
+            if (valueToMonitor.GetType() != typeof(double))
+            {
+                throw new ArgumentException("The value to monitor is not valid, sorry!");
+            }
+
+            string label;
+            double minValue;
+            double maxValue;
+            int chartWidth;
+            int saveAsSVGOption;
+            string saveLocation;
+
+            //read all options here
+            if (chartOptions.Count == 6)
+            {
+                label = chartOptions[0].ToString();
+                minValue = Convert.ToDouble(chartOptions[1]);
+                maxValue = Convert.ToDouble(chartOptions[2]);
+                chartWidth = Convert.ToInt32(chartOptions[3]);
+                saveAsSVGOption = Convert.ToInt32(chartOptions[4]);
+                saveLocation = chartOptions[5].ToString();
+            }
+            else
+            {
+                label = "Label";
+                minValue = 0;
+                maxValue = 100;
+                chartWidth = 500;
+                saveAsSVGOption = 1;
+                saveLocation = "Desktop";
+            }
+
+            if (minValue >= maxValue)
+            {
+                throw new ArgumentException("Minimum value needs to be smaller than the maximum value.");
+            }
+
+            if (chartWidth < 500)
+            {
+                chartWidth = 500;
+            }
+
+            if (saveLocation == "" || string.Compare(saveLocation, "Desktop") == 0 || saveLocation == null)
+                saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            var progressHeight = 20;
+            var chartMargin = 50;
+            var chartWid = chartWidth + 2 * chartMargin + 2 * progressHeight; var chartHei = progressHeight + 2 * chartMargin;
+
+            var SVGStringBuilder = new StringBuilder();
+            SVGStringBuilder.Append("<?xml version='1.0' encoding='UTF-8'?>");
+            SVGStringBuilder.Append(String.Format("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='{0}px' height='{1}px' viewBox='0 0 {2} {3}' xml:space='preserve' >\n", chartWid, chartHei, chartWid, chartHei));
+
+            //draw graph background. The plot is always 500pt by 500pt
+            SVGStringBuilder.Append(String.Format("<rect x='0' y='0' width='{0}' height='{1}' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n", chartWid, chartHei));
+
+            var progressWidth = (chartWidth * valueToMonitor - minValue * chartWidth) / (maxValue - minValue);
+            if (progressWidth < 0)
+                progressWidth = 0;
+            if (progressWidth > chartWidth)
+                progressWidth = chartWidth;
+
+
+            var minFillColor = "none";
+            var maxFillColor = minFillColor;
+            if (valueToMonitor < minValue)
+            {
+                minFillColor = "rgba(214, 63, 41, 1)";
+            }
+
+            if (valueToMonitor > maxValue)
+            {
+                maxFillColor = "rgba(214, 63, 41, 1)";
+            }
+
+            //draw marking
+            SVGStringBuilder.Append("<g name='skeleton'>  \n");
+            //draw rectangles
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='{2}' height='{3}' style='fill:#3498DB; shape-rendering: crispEdges;' />\n", chartMargin + progressHeight, chartMargin, progressWidth, progressHeight));
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='{2}' height='{2}' style='fill:{3}; stroke-width:1px; stroke: #888; shape-rendering: crispEdges;' />\n", chartMargin, chartMargin, progressHeight, minFillColor));
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='{2}' height='{3}' style='fill:none; stroke-width:1px; stroke: #888; shape-rendering: crispEdges;' />\n", chartMargin + progressHeight, chartMargin, chartWidth, progressHeight));
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='{2}' height='{2}' style='fill:{3}; stroke-width:1px; stroke: #888; shape-rendering: crispEdges;' />\n", chartMargin + progressHeight + chartWidth, chartMargin, progressHeight, maxFillColor));
+
+            SVGStringBuilder.Append("</g>  \n");
+
+            //chart title
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' font-size='12px' fill='#222' text-anchor='middle' font-family='sans-serif' >{2}</text>", (chartWid / 2), (30), label));
+            SVGStringBuilder.Append(String.Format("<line x1='{0}' y1='{1}' x2='{2}' y2='{3}' style='stroke:#888; stroke-width:1;shape-rendering: crispEdges;'/>", chartMargin + progressHeight, chartMargin, chartMargin + progressHeight, chartMargin + progressHeight + 10));
+            SVGStringBuilder.Append(String.Format("<line x1='{0}' y1='{1}' x2='{2}' y2='{3}' style='stroke:#888; stroke-width:1;shape-rendering: crispEdges;'/>", chartMargin + progressHeight + chartWidth, chartMargin, chartMargin + progressHeight + chartWidth, chartMargin + progressHeight + 10));
+
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle'>{2}</text>", chartMargin + progressHeight, chartMargin + progressHeight + 20, minValue));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle'>{2}</text>", chartMargin + progressHeight + chartWidth, chartMargin + progressHeight + 20, maxValue));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#333; font-family: sans-serif; font-size: 13px; ' text-anchor='middle'>{2}</text>", chartMargin + progressHeight + chartWidth / 2, chartMargin + progressHeight + 20, valueToMonitor));
+
+            SVGStringBuilder.Append("</svg>");
+
+            var SVGContent = SVGStringBuilder.ToString();
+
+
+            if (saveAsSVGOption != 0)
+            {
+                var file = CreateNewSVGFile(saveLocation, "scatterPlot");
+                file.WriteLine(SVGContent);
+                file.Close();
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(SVGContent);
+
+
+            Svg.SvgDocument svgdoc = new Svg.SvgDocument();
+
+            var xmlStream = new System.IO.MemoryStream(UTF8Encoding.Default.GetBytes(doc.InnerXml));
+            svgdoc = Svg.SvgDocument.Open(xmlStream);
+
+            var imageStream = new System.IO.MemoryStream();
+            svgdoc.Draw().Save(imageStream, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            System.Drawing.Bitmap imageFile = new System.Drawing.Bitmap(imageStream);
+            return imageFile;
+
+
+
+        }
+
+        public static List<object> chartOptions(String label = "Label", double minValue = 0, double maxValue = 100,
+                                  int chartWidth = 500, int saveAsSVGOption = 0, String saveLocation = "Desktop")
+        {
+            var optionsList = new List<object>();
+            optionsList.Add(label);
+            optionsList.Add(minValue);
+            optionsList.Add(maxValue);
+            optionsList.Add(chartWidth);
+            optionsList.Add(saveAsSVGOption);
+            optionsList.Add(saveLocation);
+
+            return optionsList;
+        }
+    }
 
     public class histogramPlot : Plot
     {
