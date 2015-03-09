@@ -35,6 +35,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ProtoGeometry">
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\ProtoGeometry.dll</HintPath>
+    </Reference>
+    <Reference Include="ProtoInterface">
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo\ProtoInterface.dll</HintPath>
+    </Reference>
     <Reference Include="svg">
       <HintPath>.\svg.dll</HintPath>
     </Reference>
@@ -48,11 +54,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="grapherIcons.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>grapherIcons.resx</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="grapherIcons.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>grapherIcons.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Grapher.guage.Small.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

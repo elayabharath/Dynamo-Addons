@@ -489,11 +489,8 @@ namespace Grapher
 
         }
 
-        public static List<int> create(IList<double> values, int intervals = 10, double minValuePlot = -1, double maxValuePlot = -1, String exportLocation = "Desktop", string Label = "X Values", string chartTitle = "", int width = 500, int height = 500)
+        public static System.Drawing.Bitmap create(IList<double> values, List<object> chartOptions = null)
         {
-            if (exportLocation == "" || string.Compare(exportLocation, "Desktop") == 0 || exportLocation == null)
-                exportLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
             //sanitize the incoming data
             if (values.Count() <= 0)
             {
@@ -503,6 +500,51 @@ namespace Grapher
             if (values.GetType() != typeof(double[]))
             {
                 throw new ArgumentException("Currently only numbers are supported, sorry!");
+            }
+
+
+            string chartTitle;
+            string XLabel;
+            string yLabel = "Occurance count";
+            int intervals;
+            double minValuePlot;
+            double maxValuePlot;
+            int chartAreaWidth;
+            int chartAreaHeight;
+            double opacity;
+            int interactiveOption;
+            int saveAsSVGOption;
+            string saveLocation;
+
+            if (chartOptions.Count == 12)
+            {
+               chartTitle = chartOptions[0].ToString();
+               XLabel = chartOptions[1].ToString();
+               yLabel = chartOptions[2].ToString();
+               intervals = Convert.ToInt32(chartOptions[3]);
+               minValuePlot = Convert.ToDouble(chartOptions[4]);
+               maxValuePlot = Convert.ToDouble(chartOptions[5]);
+               chartAreaWidth = Convert.ToInt32(chartOptions[6]);
+               chartAreaHeight = Convert.ToInt32(chartOptions[7]);
+               opacity = Convert.ToDouble(chartOptions[8]);
+               interactiveOption = Convert.ToInt32(chartOptions[9]);
+               saveAsSVGOption = Convert.ToInt32(chartOptions[10]);
+               saveLocation = chartOptions[11].ToString();
+            }
+            else
+            {
+                chartTitle          = "Chart title";
+                XLabel              = "Values";
+                yLabel              = "Occurances count";
+                intervals           = 10;
+                minValuePlot        = -1;
+                maxValuePlot        = -1;
+                chartAreaWidth      = 500;
+                chartAreaHeight     = 500;
+                opacity             = 50.0;
+                interactiveOption   = 0;
+                saveAsSVGOption     = 0;
+                saveLocation        = "Desktop";
             }
 
 
@@ -523,8 +565,12 @@ namespace Grapher
                 throw new ArgumentException("The maxValuePlot needs to be bigger than the maximum inside the values list", "maxValuePlot");
             }
 
+            if (saveLocation == "" || string.Compare(saveLocation, "Desktop") == 0 || saveLocation == null)
+                saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-            var chartWid = width; var chartHei = height;
+
+
+            var chartWid = chartAreaWidth; var chartHei = chartAreaHeight;
             var chartMargin = 50;
             chartWid = chartWid + chartMargin;
             chartHei = chartHei + chartMargin;
@@ -542,11 +588,12 @@ namespace Grapher
             }
 
             //draw the xAxis marking
-            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='" + chartWid + "px' height='" + chartHei + "px' viewBox='0 0 " + chartWid + " " + chartHei + "' xml:space='preserve' >     \n";
-
+            var SVGStringBuilder = new StringBuilder();
+            SVGStringBuilder.Append(String.Format("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='{0}px' height='{1}px' viewBox='0 0 {0} {1}' xml:space='preserve' >\n", chartWid, chartHei));
+            
             //draw graph background. The plot is always 500pt by 500pt
-            SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />    \n";
-
+            SVGStringBuilder.Append(String.Format("<rect x='0' y='0' width='{0}' height='{1}' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n", chartWid, chartHei));
+            
             List<int> histogram = new List<int>(new int[intervals]);
 
             for (int i = 0; i < intervals; ++i)
@@ -576,59 +623,79 @@ namespace Grapher
             //the y axis will always start from 0 to the max of the numbers
             var yAxisVals = findAxis(histogram);
 
-            SVGContent += "<g name='yaxis'>  \n";
+            SVGStringBuilder.Append("<g name='yaxis'>  \n");
             for (int i = 0; i < yAxisVals.Count; ++i)
             {
                 var x = minPosY + (maxPosY - minPosY) * i / (yAxisVals.Count - 1);
-                SVGContent += "<path d='M" + chartMargin + " " + x + " L" + (chartWid - chartMargin) + " " + x + "' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + (chartMargin - 10) + "' y='" + x + "' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 " + (chartMargin - 10) + "," + x + ")'>" + yAxisVals[yAxisVals.Count - i - 1] + "</text>";
+                SVGStringBuilder.Append(String.Format("<path d='M{0} {1} L{2} {1}' style='stroke-width:1px; stroke: #DDD; fill: none; shape-rendering: crispEdges;'/> \n", chartMargin, x, (chartWid - chartMargin)));
+                SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px; ' text-anchor='middle' transform='rotate(270 {0},{1})'>{2}</text>", (chartMargin - 10), x, yAxisVals[yAxisVals.Count - i - 1]));
             }
-            SVGContent += "</g>  \n";
+            SVGStringBuilder.Append("</g>  \n");
 
-            SVGContent += "<g name='xaxis'>  \n";
+
+            SVGStringBuilder.Append("<g name='xaxis'>  \n");
             for (int i = 0; i < axisVals.Count; ++i)
             {
                 var x = minPosX + (maxPosX - minPosX) * i / (axisVals.Count - 1);
-                SVGContent += "<path d='M" + x + " " + (chartHei - chartMargin - 7) + " L" + x + " " + (chartHei - chartMargin + 7) + "' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;'/>     \n";
-                SVGContent += "<text x='" + x + "' y='" + (chartHei - chartMargin + 15) + "' style='fill:#888; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + axisVals[i] + "</text>";
-
+                SVGStringBuilder.Append(String.Format("<path d='M{0} {1} L{0} {2}' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;'/>     \n", x, (chartHei - chartMargin - 7), (chartHei - chartMargin + 7)));
+                SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#888; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>{2}</text>", x, (chartHei - chartMargin + 15), axisVals[i]));
             }
-            SVGContent += "</g>  \n";
-
+            SVGStringBuilder.Append("</g>  \n");
+            
             //draw the rectangles
-            SVGContent += "<g name='yaxis'>  \n";
+
+            SVGStringBuilder.Append("<g name='yaxis'>  \n");
             for (int i = 0; i < histogram.Count; ++i)
             {
                 var x = minPosX + (maxPosX - minPosX) * i / (histogram.Count);
                 var y = (minPosY * (histogram[i] - yAxisVals[yAxisVals.Count - 1]) + maxPosY * (yAxisVals[0] - histogram[i])) / (yAxisVals[0] - yAxisVals[yAxisVals.Count - 1]);
 
-                SVGContent += "<rect id='histogramBar" + i + "' x='" + x + "' y='" + (chartHei - y) + "' width='" + ((maxPosX - minPosX) / (histogram.Count)) + "' height='" + (y - chartMargin) + "' style='stroke-width:1px; stroke: rgba(200, 30, 30, 0.9); fill: rgba(200, 30, 30, 0.7); shape-rendering: crispEdges;' />   \n";
-                SVGContent += "<text x='" + (x + ((maxPosX - minPosX) / (histogram.Count)) / 2) + "' y='" + (chartHei - y - 10) + "'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' text-anchor='middle'>" + histogram[i] + "<text/>";
-                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='histogramBar" + i + ".mouseover' end='histogramBar" + i + ".mouseout'/>";
-                SVGContent += "</text>";
+                SVGStringBuilder.Append(String.Format("<rect id='histogramBar{0}' x='{1}' y='{2}' width='{3}' height='{4}' style='stroke-width:1px; stroke: #FFFFFF; fill: #C81E1E; shape-rendering: crispEdges; fill-opacity:{5};' />   \n", i, x, (chartHei - y), ((maxPosX - minPosX) / (histogram.Count)), (y - chartMargin), (opacity/100.0)));
+                
+                if (interactiveOption == 1)
+                {
+                    SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}'  visibility='hidden' fill='#4192d9' font-family='sans-serif' font-size='12' text-anchor='middle'> {2}<text/>", (x + ((maxPosX - minPosX) / (histogram.Count)) / 2), (chartHei - y - 10), histogram[i]));
+                    SVGStringBuilder.Append(String.Format("<set attributeName='visibility' from='hidden' to='visible' begin='histogramBar{0}.mouseover' end='histogramBar{0}.mouseout'/>", i));
+                    SVGStringBuilder.Append("</text>");
+                }
             }
-            SVGContent += "</g> \n";
+            SVGStringBuilder.Append("</g>  \n");
 
-            SVGContent += "<rect x='" + chartMargin + "' y='" + chartMargin + "' width='" + (chartWid - 2 * chartMargin) + "' height='" + (chartHei - 2 * chartMargin) + "' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />   \n";
-
-
-
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{0}' width='{1}' height='{2}' style='stroke-width:1px; stroke: #AAA; fill: none; shape-rendering: crispEdges;' />\n", chartMargin, (chartWid - 2 * chartMargin), (chartHei - 2 * chartMargin)));
+            
             if (chartTitle == "")
-                chartTitle = "Histogram of " + Label;
+                chartTitle = "Histogram of " + XLabel;
 
             //draw values along axis
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (30) + "' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>" + chartTitle + "</text>";
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + (chartHei - 15) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>" + Label + "</text>";
-            SVGContent += "<text x='" + (chartMargin / 2) + "' y='" + (chartHei / 2) + "' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 " + (chartMargin / 2) + ", " + (chartHei / 2) + ")' text-anchor='middle'>" + "Occurances" + "</text>";
-
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#222; font-family: sans-serif; font-size: 12px;' text-anchor='middle'>{2}</text>", (chartWid / 2), 30, chartTitle));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#444; font-family: sans-serif; font-size: 10px;' text-anchor='middle'>{2}</text>", (chartWid / 2), (chartHei - 15), XLabel));
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' style='fill:#444; font-family: sans-serif; font-size: 10px;' transform='rotate(270 {0},{1})' text-anchor='middle'>{2}</text>", (chartMargin / 2), (chartHei / 2), yLabel));
+            
             //close the svg
-            SVGContent += "</svg>";
-            //export as a SVG in desktop
-            var file = CreateNewSVGFile(exportLocation, "histogramPlot");
-            file.WriteLine(SVGContent);
-            file.Close();
+            SVGStringBuilder.Append("</svg>");
 
-            return histogram;
+            var SVGContent = SVGStringBuilder.ToString();
+            if (saveAsSVGOption != 0)
+            {
+                var file = CreateNewSVGFile(saveLocation, "histogramPlot");
+                file.WriteLine(SVGContent);
+                file.Close();
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(SVGContent);
+
+
+            Svg.SvgDocument svgdoc = new Svg.SvgDocument();
+
+            var xmlStream = new System.IO.MemoryStream(UTF8Encoding.Default.GetBytes(doc.InnerXml));
+            svgdoc = Svg.SvgDocument.Open(xmlStream);
+
+            var imageStream = new System.IO.MemoryStream();
+            svgdoc.Draw().Save(imageStream, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            System.Drawing.Bitmap imageFile = new System.Drawing.Bitmap(imageStream);
+            return imageFile;
         }
 
 
@@ -655,12 +722,6 @@ namespace Grapher
             minAxis = Math.Truncate(minAxis);
             minAxis = minAxis / Math.Pow(10, digits);
 
-            /*
-            if (minAxis == min)
-            {
-                minAxis = minAxis - diff;
-            }*/
-
             List<double> axisValues = new List<double>();
             double currentAxisVal = minAxis;
             while (currentAxisVal < max)
@@ -678,6 +739,26 @@ namespace Grapher
             return axisValues;
         }
 
+        public static List<object> chartOptions(String chartTitle = "Chart title", String XLabel = "Values", int intervals = 10, double minValuePlot = -1, double maxValuePlot = -1,
+                                  int chartAreaWidth = 500, int chartAreaHeight = 500,  
+                                  double opacity = 50.0, int interactiveOption = 0, int saveAsSVGOption = 0, String saveLocation = "Desktop")
+        {
+            var optionsList = new List<object>();
+            optionsList.Add(chartTitle);
+            optionsList.Add(XLabel);
+            optionsList.Add("Occurance count");
+            optionsList.Add(intervals);
+            optionsList.Add(minValuePlot);
+            optionsList.Add(maxValuePlot);
+            optionsList.Add(chartAreaWidth);
+            optionsList.Add(chartAreaHeight);
+            optionsList.Add(opacity);
+            optionsList.Add(interactiveOption);
+            optionsList.Add(saveAsSVGOption);
+            optionsList.Add(saveLocation);
+
+            return optionsList;
+        }
     }
 
     public class pieChartPlot : Plot
@@ -687,11 +768,8 @@ namespace Grapher
 
         }
 
-        public static void create(IList<String> Items, IList<double> Values, String exportLocation = "Desktop", String chartTitle = "Chart title", int width = 500, int height = 500)
+        public static System.Drawing.Bitmap create(IList<String> Items, IList<double> Values, List<object> chartOptions = null)
         {
-            if (exportLocation == "" || string.Compare(exportLocation, "Desktop") == 0 || exportLocation == null)
-                exportLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
             //sanitize the incoming data
             if (Items.Count() <= 0 || Values.Count() <= 0)
             {
@@ -708,20 +786,56 @@ namespace Grapher
                 throw new ArgumentException("Only Strings are allowed for the items, sorry!");
             }
 
-            var chartWid = width;
-            var chartHei = height;
+            string chartTitle;
+            int chartAreaWidth;
+            int chartAreaHeight;
+            int interactiveOption;
+            int saveAsSVGOption;
+            string saveLocation;
+
+            if (chartOptions.Count == 6)
+            {
+                chartTitle = chartOptions[0].ToString();
+                chartAreaWidth = Convert.ToInt32(chartOptions[1]);
+                chartAreaHeight = Convert.ToInt32(chartOptions[2]);
+                interactiveOption = Convert.ToInt32(chartOptions[3]);
+                saveAsSVGOption = Convert.ToInt32(chartOptions[4]);
+                saveLocation = chartOptions[5].ToString();
+            }
+            else
+            {
+                chartTitle = "Chart title";
+                chartAreaWidth = 500;
+                chartAreaHeight = 500;
+                interactiveOption = 0;
+                saveAsSVGOption = 0;
+                saveLocation = "Desktop";
+            }
+
+
+            if (saveLocation == "" || string.Compare(saveLocation, "Desktop") == 0 || saveLocation == null)
+                saveLocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            var chartWid = chartAreaWidth;
+            var chartHei = chartAreaHeight;
 
             var chartCenterXY = chartWid / 2;
             var chartRad = chartWid / 2 - 40;
             var legendWid = 200;
-            var legendHei = height;
+            var legendHei = chartAreaHeight;
 
             // the chart is 400px by 400px and the legend is 200px by 400px
-            var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='" + (chartWid + legendWid) + "px' height='" + chartHei + "px' viewBox='0 0 " + (chartWid + legendWid) + " " + chartHei + "' xml:space='preserve' >     \n";
+
+            var SVGStringBuilder = new StringBuilder();
+
+            SVGStringBuilder.Append(String.Format("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='{0}px' height='{1}px' viewBox='0 0 {0} {1}' xml:space='preserve' >\n", (chartWid + legendWid), chartHei));
+            //var SVGContent = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='" + (chartWid + legendWid) + "px' height='" + chartHei + "px' viewBox='0 0 " + (chartWid + legendWid) + " " + chartHei + "' xml:space='preserve' >     \n";
 
             //draw graph background. The plot is always 500pt by 500pt
-            SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n";
-            SVGContent += "<rect x='" + chartWid + "' y='" + 0 + "' width='" + legendWid + "' height='" + legendHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n";
+            SVGStringBuilder.Append(String.Format("<rect x='0' y='0' width='{0}' height='{1}' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n", chartWid, chartHei));
+            //SVGContent += "<rect x='0' y='0' width='" + chartWid + "' height='" + chartHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n";
+            SVGStringBuilder.Append(String.Format("<rect x='{0}' y='0' width='{1}' height='{2}' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n", chartWid, legendWid, legendHei));
+            //SVGContent += "<rect x='" + chartWid + "' y='" + 0 + "' width='" + legendWid + "' height='" + legendHei + "' style='fill:#FAFAFA; stroke-width:1px; stroke: #EEE' />\n";
 
             //calculate the % of each of the items
             List<double> percentages = new List<double>();
@@ -743,27 +857,41 @@ namespace Grapher
             //generate charts
             foreach (var percentage in percentages)
             {
-                var fillColor = color[i++];
-                if (i >= 20)
+                var fillColor = color[i];
+                if (i >= 19)
                 {
                     i = 0;
                 }
 
                 var largeArcFlag = (percentage < Math.PI) ? 0 : 1;
 
-                SVGContent += "<path id='pieChartSector" + i + "' d='M " + chartCenterXY + "," + chartCenterXY +
+                SVGStringBuilder.Append(String.Format("<path id='pieChartSector{0}' d='M {1},{1} l {2},{3} A{4},{4} {5} {6},1 {7},{8} z' fill='#{9}' />\n", i, chartCenterXY, chartRad * Math.Cos(lastPercentage), chartRad * Math.Sin(lastPercentage), chartRad,
+                    lastPercentage, largeArcFlag, (chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage)), (chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage)), fillColor));
+
+                /*SVGContent += "<path id='pieChartSector" + i + "' d='M " + chartCenterXY + "," + chartCenterXY +
                     " l " + chartRad * Math.Cos(lastPercentage) + "," + chartRad * Math.Sin(lastPercentage) +
                     " A" + chartRad + "," + chartRad + " " + lastPercentage + " " + largeArcFlag + ",1 " + (chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage)) + "," + (chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage)) + " z' fill='#" + fillColor + "' stroke='rgba(0, 0, 0, 0.4)' stroke-width='0' />\n";
+                */
 
-                SVGContent += "<text x='" + ((chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage / 2))) + "' y='" + ((chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage / 2))) + "' fill='#444444' visibility='hidden' font-family='sans-serif' font-size='12'>" + "  " + Items[j] + " (" + Values[j] + ")";
-                SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='pieChartSector" + i + ".mouseover' end='pieChartSector" + i + ".mouseout'/>";
-                SVGContent += "</text>";
+                if (interactiveOption != 0)
+                {
+                    SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' fill='#444444' visibility='hidden' font-family='sans-serif' font-size='12'>{2} ({3})", ((chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage / 2))), ((chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage / 2))), Items[j], Values[j]));
+                    //SVGContent += "<text x='" + ((chartCenterXY + chartRad * Math.Cos(lastPercentage + percentage / 2))) + "' y='" + ((chartCenterXY + chartRad * Math.Sin(lastPercentage + percentage / 2))) + "' fill='#444444' visibility='hidden' font-family='sans-serif' font-size='12'>" + "  " + Items[j] + " (" + Values[j] + ")";
+
+                    SVGStringBuilder.Append(String.Format("<set attributeName='visibility' from='hidden' to='visible' begin='pieChartSector{0}.mouseover' end='pieChartSector{0}.mouseout'/>", i));
+                    //SVGContent += "<set attributeName='visibility' from='hidden' to='visible' begin='pieChartSector" + i + ".mouseover' end='pieChartSector" + i + ".mouseout'/>";
+                    SVGStringBuilder.Append("</text>");
+                    //SVGContent += "</text>";
+                }
+                
                 lastPercentage += percentage;
                 ++j;
+                ++i;
             }
 
             var margin = 20;
-            SVGContent += "<text x='" + (chartWid / 2) + "' y='" + 15 + "' fill='#444444' font-family='sans-serif' font-size='12' text-anchor='middle'>" + chartTitle + "</text>";
+            SVGStringBuilder.Append(String.Format("<text x='{0}' y='15' fill='#444444' font-family='sans-serif' font-size='12' text-anchor='middle'>{1}</text>", (chartWid / 2), chartTitle));
+            //SVGContent += "<text x='" + (chartWid / 2) + "' y='" + 15 + "' fill='#444444' font-family='sans-serif' font-size='12' text-anchor='middle'>" + chartTitle + "</text>";
 
             i = 0;
             j = 0;
@@ -776,19 +904,59 @@ namespace Grapher
                 }
 
                 var centage = Math.Round((percentages[i] / (Math.PI * 2)) * 100, 2);
-                SVGContent += "<rect x='" + (chartWid + margin) + "' y='" + ((i * 25) + 50) + "' width='20' height='20' rx='10' ry='10' fill='#" + color[i] + "' />\n";
-                SVGContent += "<text x='" + (chartWid + margin + 25) + "' y='" + ((i * 25) + 50 + 15) + "' fill='#444444' font-family='sans-serif' font-size='12'>" + "  " + centage + "%  " + item + " (" + Values[j] + ")</text>";
+                SVGStringBuilder.Append(String.Format("<rect x='{0}' y='{1}' width='20' height='20' rx='10' ry='10' fill='#{2}' />\n", (chartWid + margin), ((i * 25) + 50), color[i]));
+                //SVGContent += "<rect x='" + (chartWid + margin) + "' y='" + ((i * 25) + 50) + "' width='20' height='20' rx='10' ry='10' fill='#" + color[i] + "' />\n";
+
+                SVGStringBuilder.Append(String.Format("<text x='{0}' y='{1}' fill='#444444' font-family='sans-serif' font-size='12'>  {2}%  {3} ({4})</text>", (chartWid + margin + 25), ((i * 25) + 50 + 15), centage, item, Values[j]));
+                //SVGContent += "<text x='" + (chartWid + margin + 25) + "' y='" + ((i * 25) + 50 + 15) + "' fill='#444444' font-family='sans-serif' font-size='12'>" + "  " + centage + "%  " + item + " (" + Values[j] + ")</text>";
                 i = i + 1;
                 ++j;
             }
 
             //close the svg
-            SVGContent += "</svg>";
+            SVGStringBuilder.Append("</svg>");
 
+            var SVGContent = SVGStringBuilder.ToString();
+            if (saveAsSVGOption != 0)
+            {
+                var file = CreateNewSVGFile(saveLocation, "pieChartPlot");
+                file.WriteLine(SVGContent);
+                file.Close();
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(SVGContent);
+
+
+            Svg.SvgDocument svgdoc = new Svg.SvgDocument();
+
+            var xmlStream = new System.IO.MemoryStream(UTF8Encoding.Default.GetBytes(doc.InnerXml));
+            svgdoc = Svg.SvgDocument.Open(xmlStream);
+
+            var imageStream = new System.IO.MemoryStream();
+            svgdoc.Draw().Save(imageStream, System.Drawing.Imaging.ImageFormat.Bmp);
+
+            System.Drawing.Bitmap imageFile = new System.Drawing.Bitmap(imageStream);
+            return imageFile;
+            /*
             //export as a SVG in desktop
-            var file = CreateNewSVGFile(exportLocation, "pieChart");
+            var file = CreateNewSVGFile(saveLocation, "pieChart");
             file.WriteLine(SVGContent);
-            file.Close();
+            file.Close();*/
+        }
+
+        public static List<object> chartOptions(String chartTitle = "Chart title", int chartAreaWidth = 500, int chartAreaHeight = 500,
+                                  int interactiveOption = 0, int saveAsSVGOption = 0, String saveLocation = "Desktop")
+        {
+            var optionsList = new List<object>();
+            optionsList.Add(chartTitle);
+            optionsList.Add(chartAreaWidth);
+            optionsList.Add(chartAreaHeight);
+            optionsList.Add(interactiveOption);
+            optionsList.Add(saveAsSVGOption);
+            optionsList.Add(saveLocation);
+
+            return optionsList;
         }
 
     }
