@@ -184,5 +184,83 @@ namespace svgPort
             file.WriteLine("</svg>");
             file.Close();
         }
+
+        struct point
+        {
+            public double X;
+            public double Y;
+            public double Z;
+        }
+
+        private static void CurveKnotInsertion(int p, double[] up,
+            List<Point> P, double u, int k, int s, int r, 
+            out double[] uq, out List<Point> Q)
+        {
+            
+            int np = P.Count() - 1;
+            int mp = np + p + 1;
+            int nq = np + r;
+            int mq = nq + p + 1;
+            uq = new double[mq + 1];
+
+            // load new knot vector, uq
+            for(int i = 0; i <= k; i++)
+            {
+                uq[i] = up[i];
+            }
+            for(int i = 1; i <= r; i++)
+            {
+                uq[k + i] = u;
+            }
+            for(int i = k+1; i <= mp; i++)
+            {
+                uq[i + r] = up[i];
+            }
+
+            var qq = new point[nq + 1];
+            for(int i = 0; i<= k-p; i++)
+            {
+                qq[i].X = P[i].X;
+                qq[i].Y = P[i].Y;
+                qq[i].Z = P[i].Z;
+            }
+            for(int i = k-s; i <= np; i++)
+            {
+                qq[i + r].X = P[i].X;
+                qq[i + r].Y = P[i].Y;
+                qq[i + r].Z = P[i].Z;
+            }
+            var rr = new point[p + 1];
+            for(int i=0; i<= p-s; i++)
+            {
+                rr[i].X = P[k - p + i].X;
+                rr[i].Y = P[k - p + i].Y;
+                rr[i].Z = P[k - p + i].Z;
+            }
+            int l = 0;
+            for(int j=1; j <= r; j++)
+            {
+                l = k - p + j;
+                for(int i = 0; i <= p-j-s; i++)
+                {
+                    var alpha = (u - up[l + i]) / (up[i + k + 1] - up[l + i]);
+                    rr[i].X = alpha * rr[i + 1].X + (1 - alpha) * rr[i].X;
+                    rr[i].Y = alpha * rr[i + 1].Y + (1 - alpha) * rr[i].Y;
+                    rr[i].Z = alpha * rr[i + 1].Z + (1 - alpha) * rr[i].Z;
+                }
+                qq[l] = rr[0];
+                qq[k + r - j - s] = rr[p - j - s];
+            }
+            for(int i = l+1; i < k-s; i++)
+            {
+                qq[i] = rr[i - l];
+            }
+            Q = new List<Point>();
+            foreach(var pt in qq)
+            {
+                //pt.X, pt.Y, pt.Z
+                //Q.Add();
+            }
+        }
     }
 }
