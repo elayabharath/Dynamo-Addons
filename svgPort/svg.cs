@@ -183,20 +183,7 @@ namespace svgPort
 
             foreach(var nurbCurve in nurbsCurves)
             {
-                var P = nurbCurve.ControlPoints();
-                int p = nurbCurve.Degree;
-                var U = nurbCurve.Knots();
-                int m = P.Length + p;
-                Debug.Assert(U.Length == m+1);
-
-                // Assuming this is a clamped NURBS curve with knot vector
-                // {U0, ..., Up, Up+1, ..., Um-p-1, Um-p ... Um}
-                // we insert each of the internal knots {Up+1, ..., Um-p-1}
-                // p-1 times. 
-                int n = P.Length - 1;
-                int nb;
-                Point[][] Q;
-                DecomposeCurve(n, p, U, P, out nb, out Q);
+                var Q = DecomposeNurbsCurve(nurbCurve);
 
                 // Write j'th point Q[i][j] for every i'th Bezier curve
             }
