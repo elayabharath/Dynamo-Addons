@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Autodesk.DesignScript.Geometry;
 using System.Collections;
 using Autodesk.DesignScript.Runtime;
@@ -72,33 +73,35 @@ namespace svgPort
             List<Circle> circles = new List<Circle>();
             List<Polygon> polygons = new List<Polygon>();
             List<Curve> polylines = new List<Curve>();
+            List<NurbsCurve> nurbsCurves = new List<NurbsCurve>();
             //TODO: Need to support paths
 
 
-            for (int i = 0; i < geometry.Count(); ++i)
+            for (int i = 0; i < geometry.Length; ++i)
             {
                 geometry[i] = geometry[i].Translate(0 - minPt.X, 0 - minPt.Y, 0);
-
-                if (geometry[i].GetType() == typeof(Point))
+                
+                var geomType = geometry[i].GetType();
+                if (geomType == typeof(Point))
                     pts.Add((Point)geometry[i]);
 
-                else if (geometry[i].GetType() == typeof(Line))
+                else if (geomType == typeof(Line))
                     lines.Add((Line)geometry[i]);
 
-                else if (geometry[i].GetType() == typeof(Ellipse))
+                else if (geomType == typeof(Ellipse))
                     ellipses.Add((Ellipse)geometry[i]);
 
-                else if (geometry[i].GetType() == typeof(Circle))
+                else if (geomType == typeof(Circle))
                     circles.Add((Circle)geometry[i]);
 
-                else if (geometry[i].GetType() == typeof(Polygon))
+                else if (geomType == typeof(Polygon))
                     polygons.Add((Polygon)geometry[i]);
+
+                else if (geomType == typeof(NurbsCurve))
+                    nurbsCurves.Add((NurbsCurve)geometry[i]);
 
             }
 
-            
-            
-            
             //TODO: currently Z values are ignored, need a better way to do this
             //TODO: segregate points by layers
 
@@ -178,11 +181,35 @@ namespace svgPort
                     file.WriteLine("</g>");
             }
 
+            foreach(var nurbCurve in nurbsCurves)
+            {
+                var Q = DecomposeNurbsCurve(nurbCurve);
 
+                // Write j'th point Q[i][j] for every i'th Bezier curve
+            }
 
             //complete the svg tag
             file.WriteLine("</svg>");
             file.Close();
+        }
+
+        public static Point[][] DecomposeNurbsCurve(NurbsCurve nurbCurve)
+        {
+            var P = nurbCurve.ControlPoints();
+            int p = nurbCurve.Degree;
+            var U = nurbCurve.Knots();
+            int m = P.Length + p;
+            Debug.Assert(U.Length == m + 1);
+
+            // Assuming this is a clamped NURBS curve with knot vector
+            // {U0, ..., Up, Up+1, ..., Um-p-1, Um-p ... Um}
+            // we insert each of the internal knots {Up+1, ..., Um-p-1}
+            // p-1 times. 
+            int n = P.Length - 1;
+            int nb;
+            Point[][] Q;
+            DecomposeCurve(n, p, U, P, out nb, out Q);
+            return Q;
         }
 
         struct point
@@ -192,74 +219,78 @@ namespace svgPort
             public double Z;
         }
 
-        private static void CurveKnotInsertion(int p, double[] up,
-            List<Point> P, double u, int k, int s, int r, 
-            out double[] uq, out List<Point> Q)
+        private static void DecomposeCurve(int n, int p, double[] U,
+            Point[] P, out int nb, out Point[][] Q)
         {
-            
-            int np = P.Count() - 1;
-            int mp = np + p + 1;
-            int nq = np + r;
-            int mq = nq + p + 1;
-            uq = new double[mq + 1];
-
-            // load new knot vector, uq
-            for(int i = 0; i <= k; i++)
+            int m = n + p + 1;
+            int a = p;
+            int b = p + 1;
+            nb = 0;
+            // If there are m+1 knots and a clamped knot vector
+            // The number of knot intervals would ideally be (m-2p)
+            // which is also the max number of Bezier curves that can be created
+            point[,] qq = new point[m-2*p, p+1];
+            for(int i = 0; i <= p; i++)
             {
-                uq[i] = up[i];
+                qq[nb, i].X = P[i].X;
+                qq[nb, i].Y = P[i].Y;
+                qq[nb, i].Z = P[i].Z;
             }
-            for(int i = 1; i <= r; i++)
+            while(b < m)
             {
-                uq[k + i] = u;
-            }
-            for(int i = k+1; i <= mp; i++)
-            {
-                uq[i + r] = up[i];
-            }
-
-            var qq = new point[nq + 1];
-            for(int i = 0; i<= k-p; i++)
-            {
-                qq[i].X = P[i].X;
-                qq[i].Y = P[i].Y;
-                qq[i].Z = P[i].Z;
-            }
-            for(int i = k-s; i <= np; i++)
-            {
-                qq[i + r].X = P[i].X;
-                qq[i + r].Y = P[i].Y;
-                qq[i + r].Z = P[i].Z;
-            }
-            var rr = new point[p + 1];
-            for(int i=0; i<= p-s; i++)
-            {
-                rr[i].X = P[k - p + i].X;
-                rr[i].Y = P[k - p + i].Y;
-                rr[i].Z = P[k - p + i].Z;
-            }
-            int l = 0;
-            for(int j=1; j <= r; j++)
-            {
-                l = k - p + j;
-                for(int i = 0; i <= p-j-s; i++)
+                int i = b;
+                while (b < m && U[b + 1] == U[b])
+                    b++;
+                int mult = b - i + 1;
+                if(mult < p)
                 {
-                    var alpha = (u - up[l + i]) / (up[i + k + 1] - up[l + i]);
-                    rr[i].X = alpha * rr[i + 1].X + (1 - alpha) * rr[i].X;
-                    rr[i].Y = alpha * rr[i + 1].Y + (1 - alpha) * rr[i].Y;
-                    rr[i].Z = alpha * rr[i + 1].Z + (1 - alpha) * rr[i].Z;
+                    double[] alphas = new double[p];
+                    var numer = U[b] - U[a];
+                    for(int j = p; j > mult; j--)
+                    {
+                        alphas[j-mult-1] = numer/(U[a+j]-U[a]);
+                    }
+                    int r = p-mult;
+                    for(int j=1; j <= r; j++)
+                    {
+                        var save = r - j;
+                        int s = mult + j;
+                        for(int k=p; k >=s; k--)
+                        {
+                            var alpha = alphas[k - s];
+                            qq[nb, k].X = alpha * qq[nb, k].X + (1 - alpha) * qq[nb, k - 1].X;
+                            qq[nb, k].Y = alpha * qq[nb, k].Y + (1 - alpha) * qq[nb, k - 1].Y;
+                            qq[nb, k].Z = alpha * qq[nb, k].Z + (1 - alpha) * qq[nb, k - 1].Z;
+                        }
+                        if(b < m)
+                        {
+                            qq[nb + 1, save] = qq[nb, p];
+                        }
+                    }
                 }
-                qq[l] = rr[0];
-                qq[k + r - j - s] = rr[p - j - s];
+                nb = nb + 1;
+                if(b < m)
+                {
+                    for(int j = p - mult; j <= p; j++)
+                    {
+                        qq[nb, j].X = P[b - p + j].X;
+                        qq[nb, j].Y = P[b - p + j].Y;
+                        qq[nb, j].Z = P[b - p + j].Z;
+                    }
+                    a = b;
+                    b = b + 1;
+                }
             }
-            for(int i = l+1; i < k-s; i++)
+            int nrows = qq.GetLength(0);
+            Q = new Point[nrows][];
+            for(int i = 0; i < nrows; i++)
             {
-                qq[i] = rr[i - l];
-            }
-            Q = new List<Point>();
-            foreach(var pt in qq)
-            {
-                //pt.X, pt.Y, pt.Z
-                //Q.Add();
+                Q[i] = new Point[p + 1];
+                for(int j=0; j<=p; j++)
+                {
+                    Q[i][j] = Point.ByCoordinates(
+                        qq[i, j].X, qq[i, j].Y, qq[i, j].Z);
+                }
             }
         }
     }
