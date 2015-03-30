@@ -34,26 +34,28 @@ namespace svgPort
             file.WriteLine(line3);
         }
 
-        public static void exportPathsAsSVG([ArbitraryDimensionArrayImport] IList geometryList, String exportLocation, string fileName)
+        public static void exportPathsAsSVG(Geometry[] geometry, String exportLocation, string fileName)
         {
             //IList<Geometry> geometry = geometryList as IList<Geometry>;
 
-            var type = geometryList.GetType();
+            //var type = geometryList.GetType();
             
-            Geometry[] geometry;
+            //Geometry[] geometry;
 
-            try
+            /*try
             {
                 geometry = geometryList.Cast<List<Geometry>>().SelectMany(i => i).ToArray();
             }
             catch
             {
                 geometry = geometryList.Cast<Geometry>().ToArray();
-            }
+            }*/
 
+            
             var boundingBox = BoundingBox.ByGeometry(geometry);
             var maxPt = boundingBox.MaxPoint;
             var minPt = boundingBox.MinPoint;
+            
 
             //TODO: Handle replication for geometry
 
@@ -104,6 +106,8 @@ namespace svgPort
 
             //TODO: currently Z values are ignored, need a better way to do this
             //TODO: segregate points by layers
+
+
 
             //write all points into the file
             for (int i = 0; i < pts.Count; ++i)
@@ -159,6 +163,20 @@ namespace svgPort
                     file.WriteLine("</g>");
             }
 
+            //write all circles into the file
+            for (int i = 0; i < circles.Count; ++i)
+            {
+                if (i == 0)
+                    file.WriteLine("<g>");
+
+                double x = circles[i].CenterPoint.X;
+                double y = circles[i].CenterPoint.Y;
+
+                file.WriteLine("<circle cx='" + x.ToString() + "' cy='" + y.ToString() + "' r='"+ circles[i].Radius +"' fill='none' stroke='red' stroke-width='1'/>");
+
+                if (i == circles.Count - 1)
+                    file.WriteLine("</g>");
+            }
 
             //write all polygons into the file
             for (int i = 0; i < polygons.Count; ++i)
@@ -181,14 +199,38 @@ namespace svgPort
                     file.WriteLine("</g>");
             }
 
-            foreach(var nurbCurve in nurbsCurves)
+
+
+            //write all nurbscurve into a file
+            for (int i = 0; i < nurbsCurves.Count; ++i)
             {
-                var Q = DecomposeNurbsCurve(nurbCurve);
+                if (i == 0)
+                    file.WriteLine("<g>");
 
-                // Write j'th point Q[i][j] for every i'th Bezier curve
+                var pathString = "<path d='";
+                
+                Point[][] bCurve = DecomposeNurbsCurve(nurbsCurves[i]);
+
+                pathString += "M" + bCurve[0][0].X + "," + bCurve[0][0].Y + " C";
+
+                for (int m = 0; m < bCurve.Count(); ++m)
+                {
+                    for (int n = 1; n < bCurve[m].Count(); ++n)
+                    {
+                        pathString += bCurve[m][n].X + "," + bCurve[m][n].Y + " ";
+                        
+                    }
+
+                }
+                pathString += "' fill='none' stroke='red' stroke-width='1' />";
+                file.WriteLine(pathString);
+                
+                if (i == nurbsCurves.Count - 1)
+                    file.WriteLine("</g>");
             }
+            
 
-            //complete the svg tag
+           //complete the svg tag
             file.WriteLine("</svg>");
             file.Close();
         }
