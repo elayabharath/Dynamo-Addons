@@ -8,10 +8,14 @@ using Autodesk.DesignScript.Geometry;
 using System.Collections;
 using Autodesk.DesignScript.Runtime;
 
-namespace svgPort
+namespace Illustrator
 {
     public class SVG
     {
+        private SVG()
+        {
+        }
+
         private static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
         {
             //check for invalid characters in the file name
@@ -34,7 +38,7 @@ namespace svgPort
             file.WriteLine(line3);
         }
 
-        public static void exportPathsAsSVG(Geometry[] geometry, String exportLocation, string fileName)
+        public static void export(Geometry[] geometry, String exportLocation, string fileName)
         {
             //IList<Geometry> geometry = geometryList as IList<Geometry>;
 
@@ -235,7 +239,7 @@ namespace svgPort
             file.Close();
         }
 
-        public static Point[][] DecomposeNurbsCurve(NurbsCurve nurbCurve)
+        private static Point[][] DecomposeNurbsCurve(NurbsCurve nurbCurve)
         {
             var P = nurbCurve.ControlPoints();
             int p = nurbCurve.Degree;

@@ -7,8 +7,8 @@
     <ProjectGuid>{875612B7-864D-4664-BE59-BCB2A63DBA8A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>svgPort</RootNamespace>
-    <AssemblyName>svgPort</AssemblyName>
+    <RootNamespace>Illustrator</RootNamespace>
+    <AssemblyName>Illustrator</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dataAnalysis", "DataAnalysi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySpirals", "GeometrySpirals\GeometrySpirals.csproj", "{8E2BBD9F-F2B8-4493-92AA-4A084FD2A68E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svgPort", "svgPort\svgPort.csproj", "{875612B7-864D-4664-BE59-BCB2A63DBA8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Illustrator", "svgPort\Illustrator.csproj", "{875612B7-864D-4664-BE59-BCB2A63DBA8A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grapher", "grapher\Grapher.csproj", "{9EAEC452-7F91-470E-8957-BC10EEA18C97}"
 EndProject
