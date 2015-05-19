@@ -42,3 +42,5 @@ WARNNG: Google maps allows only 25000 requests per day per application, please b
 ![alt tag](/Resources/pieChart.png)
 ![alt tag](/Resources/scatterPlot.png)
 ![alt tag](/Resources/histogramPlot.png)
+
+![BuildStatus](http://dynamobim.com/app/display.php/?buildstatus=1&teststatus=1&coverage=1)
