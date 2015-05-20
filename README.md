@@ -1,5 +1,7 @@
 ![Build Status](http://dynamobim.com/app/badge.svg)
 
+![Build Status](http://dynamobim.com/app/show.php/?buildstatus=1&teststatus=1&coverage=2)
+
 Dynamo-Addons
 ==================
 
