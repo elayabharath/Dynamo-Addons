@@ -1,4 +1,4 @@
-![image](http://dynamobim.com/app/display.php/?buildstatus=1&teststatus=1&coverage=2)
+![image](http://dynamobim.com/app/badge.svg)
 
 Dynamo-Addons
 ==================
