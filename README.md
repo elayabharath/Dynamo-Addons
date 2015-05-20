@@ -1,6 +1,6 @@
 ![Build Status](http://dynamobim.com/app/badge.svg)
 
-![Build Status](http://dynamobim.com/app/show.php/?buildstatus=2&teststatus=1&coverage=1)
+![Build Status](http://dynamobim.com/app/show.php/?buildstatus=1&teststatus=1&coverage=1)
 
 Dynamo-Addons
 ==================
