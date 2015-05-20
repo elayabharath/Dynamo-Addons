@@ -1,3 +1,5 @@
+![image](http://dynamobim.com/app/display.php/?buildstatus=1&teststatus=1&coverage=2)
+
 Dynamo-Addons
 ==================
 
