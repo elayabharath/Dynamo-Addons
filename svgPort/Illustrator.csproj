@@ -7,8 +7,8 @@
     <ProjectGuid>{875612B7-864D-4664-BE59-BCB2A63DBA8A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>svgPort</RootNamespace>
-    <AssemblyName>svgPort</AssemblyName>
+    <RootNamespace>Illustrator</RootNamespace>
+    <AssemblyName>Illustrator</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,10 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ProtoGeometry">
-      <HintPath>..\..\Dynamo\bin\AnyCPU\Debug\ProtoGeometry.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo 0.8\ProtoGeometry.dll</HintPath>
     </Reference>
     <Reference Include="ProtoInterface">
-      <HintPath>..\..\Dynamo\bin\AnyCPU\Debug\ProtoInterface.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Dynamo 0.8\ProtoInterface.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
