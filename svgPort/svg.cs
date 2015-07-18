@@ -72,8 +72,9 @@ namespace svgPort
             List<Ellipse> ellipses = new List<Ellipse>();
             List<Circle> circles = new List<Circle>();
             List<Polygon> polygons = new List<Polygon>();
-            List<Curve> polylines = new List<Curve>();
+            
             List<NurbsCurve> nurbsCurves = new List<NurbsCurve>();
+            var polyCurves = new List<PolyCurve>();
             //TODO: Need to support paths
 
 
@@ -99,6 +100,9 @@ namespace svgPort
 
                 else if (geomType == typeof(NurbsCurve))
                     nurbsCurves.Add((NurbsCurve)geometry[i]);
+
+                else if (geomType == typeof(PolyCurve))
+                    polyCurves.Add((PolyCurve)geometry[i]);
 
             }
 
@@ -187,6 +191,7 @@ namespace svgPort
 
                 // Write j'th point Q[i][j] for every i'th Bezier curve
             }
+            
 
             //complete the svg tag
             file.WriteLine("</svg>");
