@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Autodesk.DesignScript.Geometry;
 using System.Collections;
+using System.IO;
 using Autodesk.DesignScript.Runtime;
 
 namespace Illustrator
@@ -36,6 +37,74 @@ namespace Illustrator
             file.WriteLine(line1);
             file.WriteLine(line2);
             file.WriteLine(line3);
+        }
+
+        private static void WriteLine(StreamWriter file, Line line)
+        {
+            Point startPt = line.StartPoint;
+            Point endPt = line.EndPoint;
+
+            double x1 = startPt.X;
+            double y1 = startPt.Y;
+
+            double x2 = endPt.X;
+            double y2 = endPt.Y;
+
+            file.WriteLine("<line x1='" + x1.ToString() + "' y1='" + y1.ToString() + "' x2='" + x2.ToString() + "' y2='" + y2.ToString() + "' style='stroke:black; stroke-width: 1;'/>");
+
+        }
+
+        private static void WriteCircle(StreamWriter file, Circle circle)
+        {
+            double x = circle.CenterPoint.X;
+            double y = circle.CenterPoint.Y;
+
+            file.WriteLine("<circle cx='" + x.ToString() + "' cy='" + y.ToString() + "' r='" + circle.Radius + "' fill='none' stroke='red' stroke-width='1'/>");
+        }
+
+        private static void WriteEllipse(StreamWriter file, Ellipse ellipse)
+        {
+            Point centerPt = ellipse.CenterPoint;
+            var majorAxis = ellipse.MajorAxis;
+            var minorAxis = ellipse.MinorAxis;
+
+            file.WriteLine("<ellipse cx='" + centerPt.X + "' cy='" + centerPt.Y + "' rx='" + majorAxis.Length + "' ry='" + minorAxis.Length + "' transform='rotate(" + Math.Atan(majorAxis.Y / majorAxis.X) * 180 / Math.PI + ", " + centerPt.X + ", " + centerPt.Y + ")' style='stroke:black; stroke-width: 1;'/>");
+        }
+
+        private static void WritePolygon(StreamWriter file, Polygon polygon)
+        {
+            var vertices = new List<Point>();
+            vertices.AddRange(polygon.Points);
+
+            String collectedString = "";
+            foreach (var vertex in vertices)
+            {
+                collectedString = collectedString + vertex.X + ", " + vertex.Y + " ";
+            }
+
+            file.WriteLine("<polygon points='" + collectedString + "' style='fill: none; stroke-width: 1; stroke: #000000;'/>");
+        }
+
+        private static void WriteNurbsCurve(StreamWriter file, NurbsCurve nurbsCurve)
+        {
+            var pathString = "<path d='";
+
+            Point[][] bCurve = DecomposeNurbsCurve(nurbsCurve);
+
+            pathString += "M" + bCurve[0][0].X + "," + bCurve[0][0].Y + " C";
+
+            for (int m = 0; m < bCurve.Count(); ++m)
+            {
+                for (int n = 1; n < bCurve[m].Count(); ++n)
+                {
+                    pathString += bCurve[m][n].X + "," + bCurve[m][n].Y + " ";
+
+                }
+
+            }
+            pathString += "' fill='none' stroke='red' stroke-width='1' />";
+            file.WriteLine(pathString);
+
         }
 
         public static void export(Geometry[] geometry, String exportLocation, string fileName)
@@ -139,16 +208,7 @@ namespace Illustrator
                 if (i == 0)
                     file.WriteLine("<g>");
 
-                Point startPt = lines[i].StartPoint;
-                Point endPt = lines[i].EndPoint;
-
-                double x1 = startPt.X;
-                double y1 = startPt.Y;
-
-                double x2 = endPt.X;
-                double y2 = endPt.Y;
-
-                file.WriteLine("<line x1='" + x1.ToString() + "' y1='" + y1.ToString() + "' x2='"+ x2.ToString() +"' y2='"+y2.ToString()+"' style='stroke:black; stroke-width: 1;'/>");
+                WriteLine(file, lines[i]);
 
                 if (i == lines.Count - 1)
                     file.WriteLine("</g>");
@@ -161,11 +221,7 @@ namespace Illustrator
                 if (i == 0)
                     file.WriteLine("<g>");
 
-                Point centerPt = ellipses[i].CenterPoint;
-                var majorAxis = ellipses[i].MajorAxis;
-                var minorAxis = ellipses[i].MinorAxis;
-
-                file.WriteLine("<ellipse cx='" + centerPt.X + "' cy='" + centerPt.Y + "' rx='" + majorAxis.Length + "' ry='" + minorAxis.Length + "' transform='rotate("+Math.Atan(majorAxis.Y/majorAxis.X)*180/Math.PI+", "+centerPt.X+", "+centerPt.Y+")' style='stroke:black; stroke-width: 1;'/>");
+                WriteEllipse(file, ellipses[i]);
 
                 if (i == ellipses.Count - 1)
                     file.WriteLine("</g>");
@@ -177,10 +233,7 @@ namespace Illustrator
                 if (i == 0)
                     file.WriteLine("<g>");
 
-                double x = circles[i].CenterPoint.X;
-                double y = circles[i].CenterPoint.Y;
-
-                file.WriteLine("<circle cx='" + x.ToString() + "' cy='" + y.ToString() + "' r='"+ circles[i].Radius +"' fill='none' stroke='red' stroke-width='1'/>");
+                WriteCircle(file, circles[i]);
 
                 if (i == circles.Count - 1)
                     file.WriteLine("</g>");
@@ -192,16 +245,7 @@ namespace Illustrator
                 if (i == 0)
                     file.WriteLine("<g>");
 
-                var vertices = new List<Point>();
-                vertices.AddRange(polygons[i].Points);
-
-                String collectedString = "";
-                foreach(var vertex in vertices)
-                {
-                    collectedString = collectedString + vertex.X + ", " + vertex.Y + " ";
-                }
-
-                file.WriteLine("<polygon points='"+collectedString+"' style='fill: none; stroke-width: 1; stroke: #000000;'/>");
+                WritePolygon(file, polygons[i]);
 
                 if (i == polygons.Count - 1)
                     file.WriteLine("</g>");
@@ -215,29 +259,40 @@ namespace Illustrator
                 if (i == 0)
                     file.WriteLine("<g>");
 
-                var pathString = "<path d='";
-                
-                Point[][] bCurve = DecomposeNurbsCurve(nurbsCurves[i]);
-
-                pathString += "M" + bCurve[0][0].X + "," + bCurve[0][0].Y + " C";
-
-                for (int m = 0; m < bCurve.Count(); ++m)
-                {
-                    for (int n = 1; n < bCurve[m].Count(); ++n)
-                    {
-                        pathString += bCurve[m][n].X + "," + bCurve[m][n].Y + " ";
-                        
-                    }
-
-                }
-                pathString += "' fill='none' stroke='red' stroke-width='1' />";
-                file.WriteLine(pathString);
+                WriteNurbsCurve(file, nurbsCurves[i]);
                 
                 if (i == nurbsCurves.Count - 1)
                     file.WriteLine("</g>");
             }
-            
 
+            foreach (var polyCurve in polyCurves)
+            {
+                file.WriteLine("<g>");
+                foreach (var curve in polyCurve.Curves())
+                {
+                    if (curve is NurbsCurve)
+                    {
+                        WriteNurbsCurve(file, ((NurbsCurve) curve));
+                    }
+                    else if (curve is Line)
+                    {
+                        WriteLine(file, ((Line) curve));
+                    }
+                    else if (curve is Circle)
+                    {
+                        WriteCircle(file, ((Circle) curve));
+                    }
+                    else if (curve is Ellipse)
+                    {
+                        WriteEllipse(file, ((Ellipse) curve));
+                    }
+                    else if (curve is Polygon)
+                    {
+                        WritePolygon(file, ((Polygon) curve));
+                    }
+                }
+                file.WriteLine("</g>");   
+            }
            //complete the svg tag
             file.WriteLine("</svg>");
             file.Close();
@@ -279,49 +334,49 @@ namespace Illustrator
             // If there are m+1 knots and a clamped knot vector
             // The number of knot intervals would ideally be (m-2p)
             // which is also the max number of Bezier curves that can be created
-            point[,] qq = new point[m-2*p, p+1];
-            for(int i = 0; i <= p; i++)
+            point[,] qq = new point[m - 2 * p, p + 1];
+            for (int i = 0; i <= p; i++)
             {
                 qq[nb, i].X = P[i].X;
                 qq[nb, i].Y = P[i].Y;
                 qq[nb, i].Z = P[i].Z;
             }
-            while(b < m)
+            while (b < m)
             {
                 int i = b;
                 while (b < m && U[b + 1] == U[b])
                     b++;
                 int mult = b - i + 1;
-                if(mult < p)
+                if (mult < p)
                 {
                     double[] alphas = new double[p];
                     var numer = U[b] - U[a];
-                    for(int j = p; j > mult; j--)
+                    for (int j = p; j > mult; j--)
                     {
-                        alphas[j-mult-1] = numer/(U[a+j]-U[a]);
+                        alphas[j - mult - 1] = numer / (U[a + j] - U[a]);
                     }
-                    int r = p-mult;
-                    for(int j=1; j <= r; j++)
+                    int r = p - mult;
+                    for (int j = 1; j <= r; j++)
                     {
                         var save = r - j;
                         int s = mult + j;
-                        for(int k=p; k >=s; k--)
+                        for (int k = p; k >= s; k--)
                         {
                             var alpha = alphas[k - s];
                             qq[nb, k].X = alpha * qq[nb, k].X + (1 - alpha) * qq[nb, k - 1].X;
                             qq[nb, k].Y = alpha * qq[nb, k].Y + (1 - alpha) * qq[nb, k - 1].Y;
                             qq[nb, k].Z = alpha * qq[nb, k].Z + (1 - alpha) * qq[nb, k - 1].Z;
                         }
-                        if(b < m)
+                        if (b < m)
                         {
                             qq[nb + 1, save] = qq[nb, p];
                         }
                     }
                 }
                 nb = nb + 1;
-                if(b < m)
+                if (b < m)
                 {
-                    for(int j = p - mult; j <= p; j++)
+                    for (int j = p - mult; j <= p; j++)
                     {
                         qq[nb, j].X = P[b - p + j].X;
                         qq[nb, j].Y = P[b - p + j].Y;
@@ -333,10 +388,10 @@ namespace Illustrator
             }
             int nrows = qq.GetLength(0);
             Q = new Point[nrows][];
-            for(int i = 0; i < nrows; i++)
+            for (int i = 0; i < nrows; i++)
             {
                 Q[i] = new Point[p + 1];
-                for(int j=0; j<=p; j++)
+                for (int j = 0; j <= p; j++)
                 {
                     Q[i][j] = Point.ByCoordinates(
                         qq[i, j].X, qq[i, j].Y, qq[i, j].Z);

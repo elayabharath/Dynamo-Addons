@@ -48,7 +48,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\svgPort\svgPort.csproj">
+    <ProjectReference Include="..\svgPort\Illustrator.csproj">
       <Project>{875612b7-864d-4664-be59-bcb2a63dba8a}</Project>
       <Name>svgPort</Name>
     </ProjectReference>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 using System.Collections;
-using svgPort;
+using Illustrator;
 
 
 namespace Application
@@ -15,7 +15,7 @@ namespace Application
     {
         static void Main(string[] args)
         {
-            SVG.exportPathsAsSVG(null, "", "");
+            //SVG.export(null, "", "");
             
 
             Console.ReadKey();
