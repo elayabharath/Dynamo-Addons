@@ -24,7 +24,8 @@ namespace Illustrator
             if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
                 throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
 
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + fileName + ".svg");
+            var fullFilePath = Path.Combine(filePath, fileName + ".svg");
+            System.IO.StreamWriter file = new System.IO.StreamWriter(fullFilePath);
             return file;
         }
 
