@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 using System.Collections;
-using Illustrator;
 
 
 namespace Application
@@ -15,7 +14,7 @@ namespace Application
     {
         static void Main(string[] args)
         {
-            //SVG.export(null, "", "");
+
             
 
             Console.ReadKey();
