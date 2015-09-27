@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using Autodesk.DesignScript.Geometry;
-using System.Collections;
 using System.IO;
-using Autodesk.DesignScript.Runtime;
 
 namespace Illustrator
 {
@@ -17,19 +13,18 @@ namespace Illustrator
         {
         }
 
-        private static System.IO.StreamWriter CreateNewSVGFile(String filePath, String fileName)
+        private static StreamWriter CreateNewSVGFile(String filePath, String fileName)
         {
             //check for invalid characters in the file name
-            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
+            char[] invalidFileChars = Path.GetInvalidFileNameChars();
             if (fileName.IndexOfAny(invalidFileChars) != -1 || fileName.CompareTo("CON") == 0)
                 throw new ArgumentException("The file name does not satisfy valid windows file name criteria", "fileName");
 
-            var fullFilePath = Path.Combine(filePath, fileName + ".svg");
-            System.IO.StreamWriter file = new System.IO.StreamWriter(fullFilePath);
+            StreamWriter file = new StreamWriter(Path.Combine(filePath, fileName + ".svg"));
             return file;
         }
 
-        private static void preSVGBody(System.IO.StreamWriter file)
+        private static void preSVGBody(StreamWriter file)
         {
             String line1 = @"<?xml version=""1.0"" encoding=""iso-8859-1""?>";
             String line2 = "<!-- Generator: Dynamo SVG Export Addon. visit www.dynamobim.org  -->";
@@ -39,6 +34,8 @@ namespace Illustrator
             file.WriteLine(line2);
             file.WriteLine(line3);
         }
+
+        #region Write methods
 
         private static void WriteLine(StreamWriter file, Line line)
         {
@@ -51,7 +48,7 @@ namespace Illustrator
             double x2 = endPt.X;
             double y2 = endPt.Y;
 
-            file.WriteLine("<line x1='" + x1.ToString() + "' y1='" + y1.ToString() + "' x2='" + x2.ToString() + "' y2='" + y2.ToString() + "' style='stroke:black; stroke-width: 1;'/>");
+            file.WriteLine("<line x1='" + x1 + "' y1='" + y1 + "' x2='" + x2 + "' y2='" + y2 + "' style='stroke:black; stroke-width: 1;'/>");
 
         }
 
@@ -60,7 +57,7 @@ namespace Illustrator
             double x = circle.CenterPoint.X;
             double y = circle.CenterPoint.Y;
 
-            file.WriteLine("<circle cx='" + x.ToString() + "' cy='" + y.ToString() + "' r='" + circle.Radius + "' fill='none' stroke='red' stroke-width='1'/>");
+            file.WriteLine("<circle cx='" + x + "' cy='" + y + "' r='" + circle.Radius + "' fill='none' stroke='red' stroke-width='1'/>");
         }
 
         private static void WriteEllipse(StreamWriter file, Ellipse ellipse)
@@ -69,7 +66,9 @@ namespace Illustrator
             var majorAxis = ellipse.MajorAxis;
             var minorAxis = ellipse.MinorAxis;
 
-            file.WriteLine("<ellipse cx='" + centerPt.X + "' cy='" + centerPt.Y + "' rx='" + majorAxis.Length + "' ry='" + minorAxis.Length + "' transform='rotate(" + Math.Atan(majorAxis.Y / majorAxis.X) * 180 / Math.PI + ", " + centerPt.X + ", " + centerPt.Y + ")' style='stroke:black; stroke-width: 1;'/>");
+            file.WriteLine("<ellipse cx='" + centerPt.X + "' cy='" + centerPt.Y + 
+                "' rx='" + majorAxis.Length + "' ry='" + minorAxis.Length + 
+                "' transform='rotate(" + Math.Atan(majorAxis.Y / majorAxis.X) * 180 / Math.PI + ", " + centerPt.X + ", " + centerPt.Y + ")' style='stroke:black; stroke-width: 1;'/>");
         }
 
         private static void WritePolygon(StreamWriter file, Polygon polygon)
@@ -108,39 +107,60 @@ namespace Illustrator
 
         }
 
+        #endregion
+
+        private static void ComputeBoundingBox(Geometry[] geometry, out Point minPt, out Point maxPt)
+        {
+            const double MAXNUM = 1000000;
+            const double MINNUM = -1000000;
+            double minX = MAXNUM, minY = MAXNUM, minZ = MAXNUM;
+            double maxX = MINNUM, maxY = MINNUM, maxZ = MINNUM;
+            foreach (var geom in geometry)
+            {
+                var boundingBox = BoundingBox.ByGeometry(geom);
+                var maxBBPt = boundingBox.MaxPoint;
+                var minBBPt = boundingBox.MinPoint;
+
+                if (minX >= minBBPt.X)
+                    minX = minBBPt.X;
+
+                if (minY >= minBBPt.Y)
+                    minY = minBBPt.Y;
+
+                if (minZ >= minBBPt.Z)
+                    minZ = minBBPt.Z;
+
+                if (maxX <= maxBBPt.X)
+                    maxX = maxBBPt.X;
+
+                if (maxY <= maxBBPt.Y)
+                    maxY = maxBBPt.Y;
+
+                if (maxZ <= maxBBPt.Z)
+                    maxZ = maxBBPt.Z;
+            }
+            minPt = Point.ByCoordinates(minX, minY, minZ);
+            maxPt = Point.ByCoordinates(maxX, maxY, maxZ);
+        }
+
         public static void export(Geometry[] geometry, String exportLocation, string fileName)
         {
-            //IList<Geometry> geometry = geometryList as IList<Geometry>;
-
-            //var type = geometryList.GetType();
-            
-            //Geometry[] geometry;
-
-            /*try
-            {
-                geometry = geometryList.Cast<List<Geometry>>().SelectMany(i => i).ToArray();
-            }
-            catch
-            {
-                geometry = geometryList.Cast<Geometry>().ToArray();
-            }*/
-
-            
-            var boundingBox = BoundingBox.ByGeometry(geometry);
-            var maxPt = boundingBox.MaxPoint;
-            var minPt = boundingBox.MinPoint;
-            
+            Point minPt, maxPt;
+            ComputeBoundingBox(geometry, out minPt, out maxPt);
 
             //TODO: Handle replication for geometry
 
             var file = CreateNewSVGFile(exportLocation, fileName);
-            
+
             //fill the SVG headers
             preSVGBody(file);
-            
+
             //start the svg tag
-            file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='"+(maxPt.X-minPt.X)+"px' height='"+(maxPt.Y-minPt.Y)+"px' viewBox='0 0 "+(maxPt.X-minPt.X)+" "+(maxPt.Y-minPt.Y)+"' xml:space='preserve'> ");
-            
+            file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' " +
+                           "xmlns:xlink='http://www.w3.org/1999/xlink' " +
+                           "x='0px' y='0px' width='" + (maxPt.X - minPt.X) + "px' height='" + (maxPt.Y - minPt.Y) +
+                           "px' viewBox='0 0 " + (maxPt.X - minPt.X) + " " + (maxPt.Y - minPt.Y) + "' xml:space='preserve'> ");
+
 
             //segregate all points
             List<Point> pts = new List<Point>();
@@ -148,7 +168,7 @@ namespace Illustrator
             List<Ellipse> ellipses = new List<Ellipse>();
             List<Circle> circles = new List<Circle>();
             List<Polygon> polygons = new List<Polygon>();
-            
+
             List<NurbsCurve> nurbsCurves = new List<NurbsCurve>();
             var polyCurves = new List<PolyCurve>();
             //TODO: Need to support paths
@@ -157,7 +177,7 @@ namespace Illustrator
             for (int i = 0; i < geometry.Length; ++i)
             {
                 geometry[i] = geometry[i].Translate(0 - minPt.X, 0 - minPt.Y, 0);
-                
+
                 var geomType = geometry[i].GetType();
                 if (geomType == typeof(Point))
                     pts.Add((Point)geometry[i]);
@@ -196,7 +216,7 @@ namespace Illustrator
                 double x = pts[i].X;
                 double y = pts[i].Y;
 
-                file.WriteLine("<circle cx='"+x.ToString()+"' cy='"+y.ToString()+"' r='1' fill='black'/>");
+                file.WriteLine("<circle cx='" + x + "' cy='" + y + "' r='1' fill='black'/>");
 
                 if (i == pts.Count - 1)
                     file.WriteLine("</g>");
@@ -252,8 +272,6 @@ namespace Illustrator
                     file.WriteLine("</g>");
             }
 
-
-
             //write all nurbscurve into a file
             for (int i = 0; i < nurbsCurves.Count; ++i)
             {
@@ -261,7 +279,7 @@ namespace Illustrator
                     file.WriteLine("<g>");
 
                 WriteNurbsCurve(file, nurbsCurves[i]);
-                
+
                 if (i == nurbsCurves.Count - 1)
                     file.WriteLine("</g>");
             }
@@ -273,31 +291,33 @@ namespace Illustrator
                 {
                     if (curve is NurbsCurve)
                     {
-                        WriteNurbsCurve(file, ((NurbsCurve) curve));
+                        WriteNurbsCurve(file, ((NurbsCurve)curve));
                     }
                     else if (curve is Line)
                     {
-                        WriteLine(file, ((Line) curve));
+                        WriteLine(file, ((Line)curve));
                     }
                     else if (curve is Circle)
                     {
-                        WriteCircle(file, ((Circle) curve));
+                        WriteCircle(file, ((Circle)curve));
                     }
                     else if (curve is Ellipse)
                     {
-                        WriteEllipse(file, ((Ellipse) curve));
+                        WriteEllipse(file, ((Ellipse)curve));
                     }
                     else if (curve is Polygon)
                     {
-                        WritePolygon(file, ((Polygon) curve));
+                        WritePolygon(file, ((Polygon)curve));
                     }
                 }
-                file.WriteLine("</g>");   
+                file.WriteLine("</g>");
             }
-           //complete the svg tag
+            //complete the svg tag
             file.WriteLine("</svg>");
             file.Close();
         }
+
+        #region NURBS to Bezier Helpers
 
         private static Point[][] DecomposeNurbsCurve(NurbsCurve nurbCurve)
         {
@@ -399,5 +419,7 @@ namespace Illustrator
                 }
             }
         }
+
+        #endregion
     }
 }
