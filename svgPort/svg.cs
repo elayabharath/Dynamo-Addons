@@ -143,7 +143,24 @@ namespace Illustrator
             maxPt = Point.ByCoordinates(maxX, maxY, maxZ);
         }
 
-        public static void export(Geometry[] geometry, String exportLocation, string fileName)
+
+        /// <summary>
+        /// Exports Dynamo geometry as an SVG File.
+        /// Supported geometry includes Point, Line, Circle, Ellipse, Polygon and NurbsCurve.
+        /// PolyCurve is not supported currently.
+        /// Only NurbsCurve of degree 3 can be converted.
+        /// </summary>
+        /// <param name="geometry">1D list of Geometry</param>
+        /// <param name="exportLocation">Folder location for saving SVG file</param>
+        /// <param name="fileName"></param>
+        /// <param name="units">
+        /// Accepted units are "em", "ex", "px", "pt", "pc", "cm", "mm", "in".
+        /// The default is pixels ("px").
+        /// </param>
+        /// <search>
+        /// export, SVG, Illustrator
+        /// </search>
+        public static void export(Geometry[] geometry, String exportLocation, string fileName, string units = "px")
         {
             Point minPt, maxPt;
             ComputeBoundingBox(geometry, out minPt, out maxPt);
@@ -158,8 +175,8 @@ namespace Illustrator
             //start the svg tag
             file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' " +
                            "xmlns:xlink='http://www.w3.org/1999/xlink' " +
-                           "x='0px' y='0px' width='" + (maxPt.X - minPt.X) + "px' height='" + (maxPt.Y - minPt.Y) +
-                           "px' viewBox='0 0 " + (maxPt.X - minPt.X) + " " + (maxPt.Y - minPt.Y) + "' xml:space='preserve'> ");
+                           "width='" + (maxPt.X - minPt.X) + units + "' height='" + (maxPt.Y - minPt.Y) +
+                           units + "' viewBox='0 0 " + (maxPt.X - minPt.X) + " " + (maxPt.Y - minPt.Y) + "' xml:space='preserve'> ");
 
 
             //segregate all points
@@ -321,6 +338,8 @@ namespace Illustrator
 
         private static Point[][] DecomposeNurbsCurve(NurbsCurve nurbCurve)
         {
+            if(nurbCurve.Degree != 3)
+                throw  new Exception("Only degree 3 NURBS curves can be exported to SVG");
             var P = nurbCurve.ControlPoints();
             int p = nurbCurve.Degree;
             var U = nurbCurve.Knots();
