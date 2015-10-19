@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<migrations>
+  <priorNameHint>
+    <oldName>Illustrator.SVG.export</oldName>
+    <newName>Illustrator.SVG.Export</newName>
+  </priorNameHint>
+</migrations>
