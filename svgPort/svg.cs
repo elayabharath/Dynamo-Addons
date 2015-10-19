@@ -147,12 +147,20 @@ namespace Illustrator
         /// <summary>
         /// Exports Dynamo geometry as an SVG File.
         /// Supported geometry includes Point, Line, Circle, Ellipse, Polygon and NurbsCurve.
-        /// PolyCurve is not supported currently.
+        /// PolyCurve is not supported currently. The default viewport width and height
+        /// are equal to the bounds of the geometry along the X and Y axes respectively.
         /// Only NurbsCurve of degree 3 can be converted.
         /// </summary>
         /// <param name="geometry">1D list of Geometry</param>
         /// <param name="exportLocation">Folder location for saving SVG file</param>
         /// <param name="fileName"></param>
+        /// <param name="viewportWidth">
+        /// If no viewport width is specified, the default width is taken to be the bounds
+        /// of the input geometry along the X-axis
+        /// </param>
+        /// <param name="viewportHeight"></param>
+        /// If no viewport height is specified, the default height is taken to be the bounds
+        /// of the input geometry along the Y-axis
         /// <param name="units">
         /// Accepted units are "em", "ex", "px", "pt", "pc", "cm", "mm", "in".
         /// The default is pixels ("px").
@@ -160,7 +168,8 @@ namespace Illustrator
         /// <search>
         /// export, SVG, Illustrator
         /// </search>
-        public static void export(Geometry[] geometry, String exportLocation, string fileName, string units = "px")
+        public static void Export(Geometry[] geometry, String exportLocation, string fileName, 
+            double viewportWidth = 0, double viewportHeight = 0, string units = "px")
         {
             Point minPt, maxPt;
             ComputeBoundingBox(geometry, out minPt, out maxPt);
@@ -172,10 +181,18 @@ namespace Illustrator
             //fill the SVG headers
             preSVGBody(file);
 
+            if (viewportWidth == 0)
+            {
+                viewportWidth = (maxPt.X - minPt.X);
+            }
+            if (viewportHeight == 0)
+            {
+                viewportHeight = (maxPt.Y - minPt.Y);
+            }
             //start the svg tag
             file.WriteLine("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' " +
                            "xmlns:xlink='http://www.w3.org/1999/xlink' " +
-                           "width='" + (maxPt.X - minPt.X) + units + "' height='" + (maxPt.Y - minPt.Y) +
+                           "width='" + viewportWidth + units + "' height='" + viewportHeight +
                            units + "' viewBox='0 0 " + (maxPt.X - minPt.X) + " " + (maxPt.Y - minPt.Y) + "' xml:space='preserve'> ");
 
 
