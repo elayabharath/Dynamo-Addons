@@ -8,7 +8,6 @@ Dynamo-Addons
 Project to add useful add-ons that will stretch the capabilities of Dynamo library. For Dynamo project, please head out to https://github.com/DynamoDS/Dynamo
 
 ## Illustrator
-==================
 - Export all 2D Dynamo geometry into Illustrator or InkScape via SVG. This is currently a work in progress, please send your feedback to elayabharath@gmail.com or aparajit.pratap@autodesk.com / please log issues under this repository.
 
 **Roadmap for Illustrator package**
